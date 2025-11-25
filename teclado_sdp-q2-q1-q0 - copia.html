@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MQKGen</title>
+  <script src="https://cdn.jsdelivr.net/npm/peggy@1.2.0"></script>
+</head>
+<body>
+  <div>	
+    <h3><a href="https://webdiis.unizar.es/~luisma/mkgen/index.html"><img src="https://webdiis.unizar.es/~luisma/mkgen/img/favicon32.png" alt="Created by MKGen"></a>
+     Formato: suma de productos de bits de estado<br>(orden de bits en productos: q2🡲q1🡲q0 )</h3>
+    <div id="botones"></div>    
+    <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️ Delete</button>
+    <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete all</button>
+    <button type="button" id="btn-copiar" onclick="copiar()" disabled title="Click to copy"
+      style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
+
+<!--
+    <p><strong>Cadena construida:</strong></p>
+-->
+    <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
+    <p id="resultado" style="font-weight: bold;"></p>
+    <p id="mensaje-copiado" style="color: green; font-weight: bold;"></p>
+  </div>
+
+  <script>
+    const simbolos = ["q2","q1","q0","|","q2'","q1'","q0'","|","·","+"];
+    const gramatica = `start  = s
+
+s = term ("+" s)*
+
+// alphabetically ordered variables in term
+term  = varA "·" varB "·" varC
+  / varA "·" varB "·" varC
+  / varA "·" varB
+  / varA "·" varC
+  / varB "·" varC
+  / varA
+  / varB
+  / varC
+
+varA = "q2'" / "q2"
+
+varB = "q1'" / "q1"
+
+varC = "q0'" / "q0"
+`;
+    let parser = null;
+
+    function compilarGramatica() {
+      try {
+        parser = peggy.generate(gramatica);
+        generarBotones();
+        evaluar();
+      } catch (e) {
+        parser = null;
+        document.getElementById("resultado").innerText = "⚠️ Grammar error: " + e.message;
+        document.getElementById("resultado").style.color = "red";
+        document.getElementById("btn-copiar").disabled = true;
+        document.getElementById("btn-copiar").style.opacity = "0.5";
+        document.getElementById("btn-copiar").style.cursor = "not-allowed";
+      }
+    }
+
+    function generarBotones() {
+      const contenedor = document.getElementById("botones");
+      contenedor.innerHTML = "";
+
+      simbolos.forEach(s => {
+        if (s === '|') {
+          contenedor.appendChild(document.createElement("br"));
+        } else {
+          const btn = document.createElement("button");
+		  btn.type = "button";
+		  if (s ===' ')
+            btn.textContent = '␣';
+          else 
+            btn.textContent = s;
+          
+          btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px;");
+          btn.onclick = () => agregar(s);
+          contenedor.appendChild(btn);
+        }
+      });
+    }
+
+    function agregar(simbolo) {
+      const input = document.getElementById("cadena");
+      input.value += simbolo;
+      evaluar();
+    }
+
+    function deshacer() {
+      const input = document.getElementById("cadena");
+      input.value = input.value.slice(0, -1);
+      evaluar();
+    }
+
+    function borrar() {
+      document.getElementById("cadena").value = "";
+      document.getElementById("resultado").innerText = "";
+      document.getElementById("mensaje-copiado").innerText = "";
+
+      const btnCopiar = document.getElementById("btn-copiar");
+      btnCopiar.disabled = true;
+      btnCopiar.style.opacity = "0.5";
+      btnCopiar.style.cursor = "not-allowed";
+    }
+
+    function copiar() {
+      const texto = document.getElementById("cadena").value;
+      navigator.clipboard.writeText(texto).then(() => {
+        const msg = document.getElementById("mensaje-copiado");
+        msg.textContent = "📎 Copied to clipboard";
+        setTimeout(() => msg.textContent = "", 2000);
+      }).catch(err => {
+        alert("Copy error: " + err);
+      });
+    }
+
+  function evaluar() {
+    const cadena = document.getElementById("cadena").value;
+    const resultado = document.getElementById("resultado");
+    const btnCopiar = document.getElementById("btn-copiar");
+
+    if (!parser) {
+      btnCopiar.disabled = true;
+      btnCopiar.style.opacity = "0.5";
+      btnCopiar.style.cursor = "not-allowed";
+      return;
+    }
+
+    try {
+      parser.parse(cadena);
+      resultado.innerText = "✅ Correct format";
+      resultado.style.color = "green";
+
+      btnCopiar.disabled = false;
+      btnCopiar.style.opacity = "1";
+      btnCopiar.style.cursor = "pointer";
+    } catch (e) {
+      resultado.innerText = "❌ Incomplete or invalid";
+      resultado.style.color = "orange";
+
+      btnCopiar.disabled = true;
+      btnCopiar.style.opacity = "0.5";
+      btnCopiar.style.cursor = "not-allowed";
+    }
+  }
+
+
+    window.onload = compilarGramatica;
+  </script>
+</body>
+</html>
