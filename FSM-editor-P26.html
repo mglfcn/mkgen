@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Editor de autómatas</title>
+  <style>
+    :root{--bg:#0f1720;--panel:#0b1220;--accent:#60a5fa;--muted:#9ca3af;--white:#e6eef8}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071024 0%, #071428 100%);color:var(--white)}
+    .app{display:flex;height:100vh}
+    .sidebar{width:320px;background:rgba(10,16,24,0.7);backdrop-filter:blur(6px);padding:14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
+    .canvas-wrap{flex:1;position:relative}
+    h1{font-size:18px;margin:6px 0}
+    p.small{color:var(--muted);font-size:13px;margin:6px 0 12px}
+    button, .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:8px 10px;border-radius:8px;cursor:pointer;margin:6px 6px 0 0}
+    .toolbar{display:flex;flex-wrap:wrap}
+    svg#canvas{width:100%;height:100%;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));cursor:crosshair}
+    .state{fill:#0b1220;stroke:var(--white);stroke-width:2}
+    .state.accept{stroke-width:4}
+    .label{font-size:13px;fill:var(--white);pointer-events:none}
+    .transition-path{fill:none;stroke:var(--muted);stroke-width:2}
+    .transition-label{font-size:14px;fill:var(--white);pointer-events:none}
+    .controls-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .muted{color:var(--muted);font-size:13px}
+    .input-sim{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--white)}
+    footer{position:absolute;left:14px;bottom:14px;color:var(--muted);font-size:12px}
+    .tip{font-size:12px;color:var(--muted);margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>Editor de autómatas</h1>
+<!--
+      <p class="small">Crea estados con clic, arrastra para moverlos y crea transiciones entre ellos. Simula cadenas y exporta/importa en JSON.</p>
+-->
+
+      <div class="toolbar">
+        <button id="btnNew">Nuevo</button>
+        <button id="btnImport">Importar JSON</button>
+        <button id="btnExport">Exportar JSON</button>
+        <button id="btnExportPNG">Exportar PNG</button>
+        <button id="btnCopy">Copy</button>
+      </div>
+
+<!--
+      <div class="controls-row">
+        <label class="muted">Entrada para simular</label>
+      </div>
+      <div style="margin-top:6px">
+        <input id="inputString" class="input-sim" placeholder="ej: 0101" />
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="btnSimStep">Paso</button>
+          <button id="btnSimRun">Ejecutar</button>
+          <button id="btnSimStop">Detener</button>
+        </div>
+      </div>
+-->
+
+      <div class="tip">
+        Atajos:
+        <ul style="margin:6px 0 0 18px;padding:0;color:var(--muted)">
+          <li>Clic vacío: crear estado</li>
+          <li>Arrastrar estado: mover</li>
+          <li>Shift + clic en un estado y arrastrar a otro: crear transición</li>
+          <li>Doble clic en estado o transición: editar etiqueta</li>
+          <li>R: marcar estado inicial (cuando seleccionado)</li>
+          <li>A: marcar/borrar estado de aceptación (cuando seleccionado)</li>
+          <li>Supr: borrar elemento seleccionado</li>
+        </ul>
+      </div>
+
+<!--
+      <div style="margin-top:12px">
+        <strong>Ayuda rápida</strong>
+        <p class="muted">Soporta transiciones con etiquetas (usa coma para múltiples símbolos). El simulador resalta el camino (modo determinista: si hay ambigüedad, sigue la primera coincidencia).</p>
+      </div>
+-->
+
+    </aside>
+
+    <div class="canvas-wrap">
+      <svg id="canvas" xmlns="http://www.w3.org/2000/svg" tabindex="0">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"></path>
+          </marker>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
+          </filter>
+        </defs>
+      </svg>
+<!--
+      <footer>Haga clic para añadir estados • Shift+arrastrar para transiciones</footer>
+-->
+    </div>
+  </div>
+
+  <input id="fileInput" type="file" accept="application/json" style="display:none" />
+
+  <script>
+	
+	
+document.getElementById("btnCopy").addEventListener("click", () => {
+
+  // --- TT ---
+  const TT = transitions
+    .slice()
+    .sort((a, b) => {
+      if (a.from !== b.from) return a.from.localeCompare(b.from);
+      if (a.label !== b.label) return a.label.localeCompare(b.label);
+      return a.to.localeCompare(b.to);
+    })
+    .map(t => `${t.from}-${t.label}-${t.to}`)
+    .join(";");
+
+  // --- TS ---
+  const TS = states
+    .slice()
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map(s => `${s.label}-${(s.initial ? "1" : "0")}`)
+    .join(";");
+
+  // --- concatenados ---
+  const result = TS + ";" + TT;
+
+  navigator.clipboard.writeText(result)
+    .then(() => alert("Copiado:\n" + result))
+    .catch(() => alert("No se pudo copiar al portapapeles"));
+});
+	
+	
+	
+/*document.getElementById("btnTT").addEventListener("click", () => {
+  
+  // sin ordenar
+  /*const parts = transitions.map(t => `${t.from}-${t.label}-${t.to}`);
+  const result = parts.join(";");*/
+  
+ /* // ordenando
+  const parts = transitions
+  .slice() // copiar para no alterar el original
+  .sort((a, b) => {
+    if (a.from !== b.from) return a.from.localeCompare(b.from);
+    if (a.label !== b.label) return a.label.localeCompare(b.label);
+    return a.to.localeCompare(b.to);
+  })
+  .map(t => `${t.from}-${t.label}-${t.to}`);
+
+const result = parts.join(";");
+
+  
+  
+  navigator.clipboard.writeText(result)
+    .then(() => alert("TT copiado:\n" + result))
+    .catch(err => alert("No se pudo copiar al portapapeles"));
+});*/
+  
+
+/*document.getElementById("btnTS").addEventListener("click", () => {
+  const parts = states
+    .slice() // evitar modificar el array original
+    .sort((a, b) => a.label.localeCompare(b.label)) // ordenar alfabéticamente
+    .map(s => {
+      const inicial = s.initial ? "1" : "0";
+      return `${s.label}-${inicial}`;
+    });
+
+  const result = parts.join(";");
+  
+  navigator.clipboard.writeText(result)
+    .then(() => alert("TS copiado:\n" + result))
+    .catch(err => alert("No se pudo copiar al portapapeles"));
+});*/
+
+
+
+	  
+	  
+	  
+  // --- Ajuste de punto final para flechas visibles ---
+  function adjustEndPoint(x1, y1, x2, y2, radius = 28) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    if (len < radius + 5) return { x: x2, y: y2 };
+    const t = (len - radius) / len;
+    return {
+      x: x1 + dx * t,
+      y: y1 + dy * t
+    };
+  }
+
+  // Estructuras de datos
+  let states = [];
+  let transitions = [];
+  let nextId = 0;
+
+  const svg = document.getElementById('canvas');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function createState(x,y,label){
+    const s = { id: 'Q'+(nextId++), x, y, label: label||('Q'+(nextId-1)), initial:false, accept:false };
+    states.push(s);
+    render();
+    return s;
+  }
+
+  function createTransition(fromId, toId, label){
+    transitions.push({ id: 't'+Math.random().toString(36).slice(2,9), from: fromId, to: toId, label: label||'' });
+    render();
+  }
+
+  function clearSVG(){ while(svg.lastChild) svg.removeChild(svg.lastChild); }
+
+  function render(){
+    // clear but keep defs
+    const defs = svg.querySelector('defs');
+    clearSVG();
+    if(defs) svg.appendChild(defs);
+
+    // transitions below states
+    transitions.forEach(t=>{
+      const from = states.find(s=>s.id===t.from);
+      const to = states.find(s=>s.id===t.to);
+      if(!from || !to) return;
+      drawTransition(from,to,t);
+    });
+
+    // states
+    states.forEach(s=> drawState(s));
+  }
+
+  function drawState(s){
+    const g = document.createElementNS(NS,'g');
+    g.setAttribute('class','state-group');
+    g.dataset.id = s.id;
+    g.style.cursor='pointer';
+
+    const circle = document.createElementNS(NS,'circle');
+    circle.setAttribute('cx',s.x);
+    circle.setAttribute('cy',s.y);
+    circle.setAttribute('r',28);
+    circle.setAttribute('class','state');
+    if(s.accept) circle.classList.add('accept');
+    circle.setAttribute('filter','url(#shadow)');
+
+    const label = document.createElementNS(NS,'text');
+    label.setAttribute('x',s.x);
+    label.setAttribute('y',s.y+5);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('class','label');
+    label.textContent = s.label;
+
+    if(s.initial){
+      const inArrow = document.createElementNS(NS,'path');
+      const ex = s.x - 68;
+      inArrow.setAttribute('d',`M${ex},${s.y} L${s.x-40},${s.y}`);
+      inArrow.setAttribute('stroke', 'white');
+      inArrow.setAttribute('stroke-width','2');
+      inArrow.setAttribute('fill','none');
+      inArrow.setAttribute('marker-end', 'url(#arrow)');
+      svg.appendChild(inArrow);
+      
+        // Etiqueta "R*"
+	  const label = document.createElementNS(NS, 'text');
+	  label.textContent = "R*";
+	  label.setAttribute('x', ex - 10);     // más a la izquierda
+	  label.setAttribute('y', s.y - 6);     // un poco por encima de la línea
+	  label.setAttribute('fill', 'white'); 
+	  label.setAttribute('font-size', '12');
+	  label.setAttribute('text-anchor', 'end');
+	  svg.appendChild(label);
+    }
+
+    g.appendChild(circle);
+    g.appendChild(label);
+    svg.appendChild(g);
+
+    // events
+    setupStateEvents(g,s);
+  }
+
+  function drawTransition(from,to,t){
+    const siblings = transitions.filter(tt => tt.from===t.from && tt.to===t.to);
+    const idx = siblings.findIndex(tt=>tt.id===t.id);
+    const k = siblings.length;
+
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const dist = Math.hypot(dx,dy);
+
+    let pathStr;
+    if(from.id === to.id){
+      const r = 40; //32;
+      const ox = from.x + r;
+      const oy = from.y - r;
+      const f = 20 //40 + idx * 20; //20 + idx * 14;
+      pathStr = `M ${from.x+r/2} ${from.y-r/4-10}
+                 C ${ox+f} ${oy-f}, ${ox+f} ${oy+f}, ${from.x+r/2+18} ${from.y-r/4+10}`;
+    } else {
+// ¿Existe también la transición inversa?
+const hasReverse = transitions.some(tt => tt.from === to.id && tt.to === from.id);
+
+// Punto final ajustado al borde del círculo
+const end = adjustEndPoint(from.x, from.y, to.x, to.y, /*28*/40);
+
+if (!hasReverse) {
+  // ✔️ SOLO hay A→B → Línea recta
+  pathStr = `M ${from.x} ${from.y} L ${end.x} ${end.y}`;
+} else {
+  // ✔️ Hay A→B y B→A → curvas opuestas
+
+  const mx = (from.x + to.x) / 2;
+  const my = (from.y + to.y) / 2;
+  let nx = -dy / dist;
+  let ny = dx / dist;
+
+  // Esta transición es la inversa?
+  const isReverse = (t.from === to.id && t.to === from.id);
+
+  // A→B curva "arriba", B→A curva "abajo"
+  if (isReverse) {
+    nx = -nx;
+    ny = -ny;
+  }
+
+  const curveOffset = 40; // apertura de la curva
+  const cx = mx + nx * curveOffset;
+  const cy = my + ny * curveOffset;
+
+  pathStr = `M ${from.x} ${from.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
+}
+
+    }
+
+    const path = document.createElementNS(NS,'path');
+    path.setAttribute('d', pathStr);
+    path.setAttribute('class','transition-path');
+    path.setAttribute('marker-end','url(#arrow)');
+    path.dataset.id = t.id;
+    svg.appendChild(path);
+
+    const text = document.createElementNS(NS,'text');
+    text.setAttribute('class','transition-label');
+    text.textContent = t.label;
+    svg.appendChild(text);
+
+   /* try{
+      const len = path.getTotalLength();
+      const p = path.getPointAtLength(len*0.55);
+      text.setAttribute('x',p.x);
+      text.setAttribute('y',p.y - 15);
+      text.setAttribute('text-anchor','middle');
+    } catch(e){
+      text.setAttribute('x',(from.x+to.x)/2);
+      text.setAttribute('y',(from.y+to.y)/2 - 6);
+    }*/
+    
+    try {
+		
+		  // Detectar si es un loop (A → A)
+      if (from.id === to.id) {
+        // Colocar la etiqueta lejos del loop para que no toque la flecha
+        text.setAttribute('x', from.x + 40);
+        text.setAttribute('y', from.y - 45);
+        text.setAttribute('text-anchor', 'middle');
+      } else {
+		
+		
+  const len = path.getTotalLength();
+  const mid = len * 0.4 /*0.5*/;
+  const p = path.getPointAtLength(mid);
+
+  // vector tangente
+  const p2 = path.getPointAtLength(mid + 1);
+  const tx = p2.x - p.x;
+  const ty = p2.y - p.y;
+
+  // vector normal (perpendicular)
+  const nx = -ty;
+  const ny = tx;
+
+  // normalizar
+  const nlen = Math.hypot(nx, ny) || 1;
+  const ux = nx / nlen;
+  const uy = ny / nlen;
+
+  // desplazar 12px — ajusta este número para más separación
+  const labelOffset = 16;
+
+  text.setAttribute('x', p.x + ux * labelOffset);
+  text.setAttribute('y', p.y + uy * labelOffset);
+  text.setAttribute('text-anchor', 'middle');
+}} catch(e) {
+  text.setAttribute('x', (from.x + to.x)/2);
+  text.setAttribute('y', (from.y + to.y)/2 - 10);
+}
+
+    
+
+    path.addEventListener('dblclick', ()=>{
+      const newLabel = prompt('Etiqueta de la transición (separa múltiples símbolos con comas):', t.label);
+      if(newLabel!==null){ t.label = newLabel; render(); }
+    });
+
+    path.addEventListener('click', (ev)=>{ ev.stopPropagation(); selectElement(t); });
+  }
+
+  // selection
+  let selected = null; // can be state object or transition object
+  function selectElement(obj){
+    selected = obj;
+    // visual feedback: outline the state circle or highlight path
+    // clear previous
+    document.querySelectorAll('.state').forEach(el=> el.setAttribute('stroke','#e6eef8'));
+    document.querySelectorAll('.transition-path').forEach(el=> el.setAttribute('stroke','#9ca3af'));
+    if(!obj) return;
+    if(obj.from){
+      // transition
+      const p = svg.querySelector(`[data-id='${obj.id}']`);
+      if(p) p.setAttribute('stroke','#60a5fa');
+    } else {
+      // state
+      const g = [...svg.querySelectorAll('.state-group')].find(gg=>gg.dataset.id===obj.id);
+      if(g){ const c = g.querySelector('circle'); if(c) c.setAttribute('stroke','#60a5fa'); }
+    }
+  }
+
+  // state interactions: dragging, double click to rename, shift+drag to create transition
+  let dragState = null; let dragOffset = {x:0,y:0};
+  let transitionStart = null; let tempLine = null;
+
+  function setupStateEvents(g,s){
+    const circle = g.querySelector('circle');
+    circle.addEventListener('mousedown', (ev)=>{
+      ev.stopPropagation();
+      if(ev.shiftKey){
+        // start transition
+        transitionStart = s;
+        tempLine = document.createElementNS(NS,'path');
+        tempLine.setAttribute('class','transition-path');
+        tempLine.setAttribute('stroke-dasharray','6 4');
+        svg.appendChild(tempLine);
+      } else {
+        dragState = s; dragOffset.x = ev.offsetX - s.x; dragOffset.y = ev.offsetY - s.y;
+      }
+      selectElement(s);
+    });
+
+    g.addEventListener('dblclick', ()=>{
+      const newLabel = prompt('Nombre del estado:', s.label);
+      if(newLabel!==null){ s.label = newLabel; render(); }
+    });
+
+    g.addEventListener('click', (ev)=>{ ev.stopPropagation(); selectElement(s); });
+  }
+
+  // canvas events
+  svg.addEventListener('mousedown', (ev)=>{
+    // create on empty click
+    if(ev.target === svg){
+      const rect = svg.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      createState(x,y);
+    }
+  });
+
+  svg.addEventListener('mousemove', (ev)=>{
+    const rect = svg.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const y = ev.clientY - rect.top;
+    if(dragState){ dragState.x = x - dragOffset.x; dragState.y = y - dragOffset.y; render(); }
+    if(transitionStart && tempLine){
+      const from = transitionStart;
+      const ctrlX = (from.x + x)/2;
+      const ctrlY = (from.y + y)/2 - 40;
+      const end = adjustEndPoint(from.x, from.y, x, y, 28);
+      const pathStr = `M ${from.x} ${from.y} Q ${ctrlX} ${ctrlY} ${end.x} ${end.y}`;
+      tempLine.setAttribute('d', pathStr);
+    }
+  });
+
+  svg.addEventListener('mouseup', (ev)=>{
+    if(dragState){ dragState = null; }
+    if(transitionStart){
+      // detect target state under mouse
+      const rect = svg.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      const target = states.find(s=> Math.hypot(s.x - x, s.y - y) < 30 );
+      if(target){
+        const label = prompt('Etiqueta de la transición (separa por comas):','');
+        if(label!==null) createTransition(transitionStart.id, target.id, label);
+      }
+      if(tempLine){ tempLine.remove(); tempLine = null; }
+      transitionStart = null;
+    }
+  });
+
+  // keyboard
+  document.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Delete' || ev.key === 'Backspace'){
+      if(selected){
+        if(selected.from){ transitions = transitions.filter(t=>t.id!==selected.id); }
+        else{ states = states.filter(s=>s.id!==selected.id); transitions = transitions.filter(t=>t.from!==selected.id && t.to!==selected.id); }
+        selected = null; render();
+      }
+    }
+    if(!selected) return;
+    if(ev.key.toLowerCase() === 'r'){
+      // mark initial
+      states.forEach(s=> s.initial = false);
+      selected.initial = true;
+      render();
+    }
+    if(ev.key.toLowerCase() === 'a'){
+      selected.accept = !selected.accept;
+      render();
+    }
+  });
+
+  // selection on clicking path or state is handled in events; clear selection on background click
+  svg.addEventListener('click', ()=>{ selectElement(null); });
+
+  // basic import/export
+  document.getElementById('btnNew').addEventListener('click', ()=>{ states=[]; transitions=[]; nextId=0; render(); });
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    const data = { states, transitions };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'automata.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  document.getElementById('btnImport').addEventListener('click', ()=>{ document.getElementById('fileInput').click(); });
+  document.getElementById('fileInput').addEventListener('change', (ev)=>{
+    const f = ev.target.files[0]; if(!f) return; const reader = new FileReader();
+    reader.onload = e=>{ try{ const obj = JSON.parse(e.target.result); states = obj.states||[]; transitions = obj.transitions||[]; nextId = (states.length? Math.max(...states.map(s=> parseInt(s.id.replace(/^q/,'')) ))+1:1); render(); }catch(err){ alert('JSON inválido'); } }
+    reader.readAsText(f);
+  });
+
+  // export svg
+  /*document.getElementById('btnExportSVG').addEventListener('click', ()=>{
+    const serializer = new XMLSerializer();
+    const clone = svg.cloneNode(true);
+    // remove tabindex to avoid issues
+    if(clone.hasAttribute('tabindex')) clone.removeAttribute('tabindex');
+    const str = serializer.serializeToString(clone);
+    const blob = new Blob([str], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'automata.svg'; a.click(); URL.revokeObjectURL(url);
+  });*/
+  
+  
+/*    document.getElementById('btnExportPNG').addEventListener('click', () => {
+    const serializer = new XMLSerializer();
+    const clone = svg.cloneNode(true);
+    if (clone.hasAttribute('tabindex')) clone.removeAttribute('tabindex');
+    const svgData = serializer.serializeToString(clone);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = function () {
+      const canvasEl = document.createElement('canvas');
+      canvasEl.width = svg.clientWidth;
+      canvasEl.height = svg.clientHeight;
+      const ctx = canvasEl.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+
+      canvasEl.toBlob(function (blob) {
+        const pngUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = 'automata.png';
+        a.click();
+        URL.revokeObjectURL(pngUrl);
+      });
+    };
+    img.src = url;
+  });*/
+
+  
+  
+document.getElementById('btnExportPNG').addEventListener('click', ()=>{
+
+/*  const css = `
+    .state { fill:#0b1220; stroke:#e6eef8; stroke-width:2; }
+    .state.accept { stroke-width:4; }
+    .transition-path { fill:none; stroke:#9ca3af; stroke-width:2; }
+    .transition-label { font-size:12px; fill:#e6eef8; }
+    text.label { font-size:13px; fill:#e6eef8; }
+  `;*/
+  
+const css = `
+  .state { fill:#0b1220; stroke:white; stroke-width:2; }
+  .state.accept { stroke-width:4; }
+  .transition-path { fill:none; stroke:black; stroke-width:2; }
+  .transition-label { font-size:12px; fill:black; pointer-events:none; }
+  text.label { font-size:13px; fill:#e6eef8; pointer-events:none; }
+`;
+
+
+  const serializer = new XMLSerializer();
+  const clone = svg.cloneNode(true);
+
+  // INSERTAR CSS DENTRO DEL SVG CLONADO
+  const style = document.createElementNS("http://www.w3.org/2000/svg","style");
+  style.textContent = css;
+  clone.insertBefore(style, clone.firstChild);
+
+  // limpiar tabindex
+  if(clone.hasAttribute('tabindex')) clone.removeAttribute('tabindex');
+  
+    // 🔥 TRUCO: forzar flechas negras
+    const arrow = clone.querySelector('#arrow path');
+    if (arrow) arrow.setAttribute('fill', 'black');  
+
+  const svgData = serializer.serializeToString(clone);
+  const svgBlob = new Blob([svgData], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = function(){
+    const canvasEl = document.createElement('canvas');
+    canvasEl.width = svg.clientWidth;
+    canvasEl.height = svg.clientHeight;
+    const ctx = canvasEl.getContext('2d');
+    ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+
+    canvasEl.toBlob(function(blob){
+      const pngUrl = URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=pngUrl;
+      a.download='automata.png';
+      a.click();
+      URL.revokeObjectURL(pngUrl);
+    });
+  };
+
+  img.src = url;
+});
+  
+  
+  
+  
+ 
+
+  // Simulation (deterministic simple)
+  let simRunning = false; let simIndex = 0; let simPath = [];
+  function resetSimulation(){ simRunning=false; simIndex=0; simPath=[]; // clear highlights
+    document.querySelectorAll('.transition-path').forEach(p=> p.setAttribute('stroke','#9ca3af'));
+    document.querySelectorAll('circle').forEach(c=> c.setAttribute('stroke','#e6eef8'));
+  }
+
+  //document.getElementById('btnSimStop').addEventListener('click', ()=>{ resetSimulation(); });
+  //document.getElementById('btnSimRun').addEventListener('click', ()=>{ runSimulation(true); });
+  //document.getElementById('btnSimStep').addEventListener('click', ()=>{ runSimulation(false); });
+
+  function runSimulation(loop){
+    const input = document.getElementById('inputString').value;
+    if(!input){ alert('Introduce una cadena'); return; }
+    resetSimulation();
+    const start = states.find(s=>s.initial) || states[0];
+    if(!start){ alert('No hay estados'); return; }
+    let current = start;
+    simPath.push(current.id);
+    const symbols = input.split('');
+    function stepOnce(i){
+      // highlight current state
+      render();
+      const g = [...svg.querySelectorAll('.state-group')].find(gg=>gg.dataset.id===current.id);
+      if(g) g.querySelector('circle').setAttribute('stroke','#34d399');
+      if(i>=symbols.length){
+        // finished
+        setTimeout(()=>{
+          if(current.accept) alert('Cadena ACEPTADA'); else alert('Cadena RECHAZADA');
+          resetSimulation();
+        },300);
+        return;
+      }
+      const sym = symbols[i];
+      // find transition with label that contains sym
+      const outgoing = transitions.filter(t=> t.from===current.id);
+      let chosen = null;
+      for(const t of outgoing){
+        const labels = t.label.split(',').map(x=>x.trim()).filter(x=>x.length>0);
+        if(labels.includes(sym)){ chosen = t; break; }
+      }
+      if(!chosen){ alert('No hay transición para símbolo "'+sym+'" — cadena RECHAZADA'); resetSimulation(); return; }
+      // highlight transition
+      const p = svg.querySelector(`[data-id='${chosen.id}']`);
+      if(p) p.setAttribute('stroke','#34d399');
+      current = states.find(s=>s.id===chosen.to);
+      setTimeout(()=>{ stepOnce(i+1); }, loop? 500: 10);
+    }
+    stepOnce(0);
+  }
+
+  // initial sample
+  createState(310,95,'Q0/000'); 
+  createState(476,93,'Q1/001');
+  createState(606,193,'Q2/010');
+  createState(642,338,'Q3/011');
+  createState(525,424,'Q4/100');
+  createState(321,443,'Q5/101');
+  createState(173,363,'Q6/110');
+  createState(171,184,'Q7/111');
+  states[7].initial = true; /*states[2].accept = true;*/
+  /*createTransition(states[0].id, states[1].id, '0');
+  createTransition(states[1].id, states[2].id, '1');
+  createTransition(states[2].id, states[2].id, 'X');*/
+  render();
+
+  </script>
+</body>
+</html>
