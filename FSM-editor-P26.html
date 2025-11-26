@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Editor de autómatas</title>
+  <title>🤖 Editor de autómatas</title>
   <style>
     :root{--bg:#0f1720;--panel:#0b1220;--accent:#60a5fa;--muted:#9ca3af;--white:#e6eef8}
     html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071024 0%, #071428 100%);color:var(--white)}
     .app{display:flex;height:100vh}
-    .sidebar{width:120px;background:rgba(10,16,24,0.7);backdrop-filter:blur(6px);padding:14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
+    .sidebar{width:80px;background:rgba(10,16,24,0.7);backdrop-filter:blur(6px);padding:14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
     .canvas-wrap{flex:1;position:relative}
     h1{font-size:18px;margin:6px 0}
     p.small{color:var(--muted);font-size:13px;margin:6px 0 12px}
@@ -30,21 +30,23 @@
 <body>
   <div class="app">
     <aside class="sidebar">
-      <h1>Editor de autómatas</h1>
+      <h1>🤖</h1>
 <!--
       <p class="small">Crea estados con clic, arrastra para moverlos y crea transiciones entre ellos. Simula cadenas y exporta/importa en JSON.</p>
 -->
 
       <div class="toolbar">
-        <button id="btnNew">Nuevo</button>
+        <button id="btnNew">⭮ Nuevo</button>
 <!--
         <button id="btnImport">Importar JSON</button>
 -->
 <!--
         <button id="btnExport">Exportar JSON</button>
 -->
+<!--
         <button id="btnExportPNG">Exportar PNG</button>
-        <button id="btnCopy">Copy</button>
+-->
+        <button id="btnCopy">📋 Copiar</button>
       </div>
 
 <!--
@@ -97,7 +99,7 @@
         </defs>
       </svg>
 
-      <footer>Clic: crear estado • Shift+clic: añadir transición • R:estado inicial • clic + Supr: borrar •  •  •  • </footer>
+      <footer>Añade las transiciones (shift+clic en estado origen y arrastrar a estado destino). • No pongas etiqueta en las transiciones • Pulsa el botón "Copiar" • Pega en el campo Respuesta</footer>
 
     </div>
   </div>
@@ -131,7 +133,7 @@ document.getElementById("btnCopy").addEventListener("click", () => {
   const result = TS + ";" + TT;
 
   navigator.clipboard.writeText(result)
-    .then(() => alert("Copiado:\n" + result))
+    .then(() => alert("Copiado\nPégalo ahora en el campo 'Respuesta' de Moodle" /*+ result*/))
     .catch(() => alert("No se pudo copiar al portapapeles"));
 });
 	
@@ -531,7 +533,7 @@ if (!hasReverse) {
   svg.addEventListener('click', ()=>{ selectElement(null); });
 
   // basic import/export
-  document.getElementById('btnNew').addEventListener('click', ()=>{ states=[]; transitions=[]; nextId=0; render(); });
+  document.getElementById('btnNew').addEventListener('click', ()=>{ states=[]; transitions=[]; nextId=0; initial_sample(); /*render();*/ });
   //document.getElementById('btnExport').addEventListener('click', ()=>{
     //const data = { states, transitions };
     //const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
@@ -589,65 +591,65 @@ if (!hasReverse) {
 
   
   
-document.getElementById('btnExportPNG').addEventListener('click', ()=>{
+//document.getElementById('btnExportPNG').addEventListener('click', ()=>{
 
-/*  const css = `
-    .state { fill:#0b1220; stroke:#e6eef8; stroke-width:2; }
-    .state.accept { stroke-width:4; }
-    .transition-path { fill:none; stroke:#9ca3af; stroke-width:2; }
-    .transition-label { font-size:12px; fill:#e6eef8; }
-    text.label { font-size:13px; fill:#e6eef8; }
-  `;*/
+///*  const css = `
+    //.state { fill:#0b1220; stroke:#e6eef8; stroke-width:2; }
+    //.state.accept { stroke-width:4; }
+    //.transition-path { fill:none; stroke:#9ca3af; stroke-width:2; }
+    //.transition-label { font-size:12px; fill:#e6eef8; }
+    //text.label { font-size:13px; fill:#e6eef8; }
+  //`;*/
   
-const css = `
-  .state { fill:#0b1220; stroke:white; stroke-width:2; }
-  .state.accept { stroke-width:4; }
-  .transition-path { fill:none; stroke:black; stroke-width:2; }
-  .transition-label { font-size:12px; fill:black; pointer-events:none; }
-  text.label { font-size:13px; fill:#e6eef8; pointer-events:none; }
-`;
+//const css = `
+  //.state { fill:#0b1220; stroke:white; stroke-width:2; }
+  //.state.accept { stroke-width:4; }
+  //.transition-path { fill:none; stroke:black; stroke-width:2; }
+  //.transition-label { font-size:12px; fill:black; pointer-events:none; }
+  //text.label { font-size:13px; fill:#e6eef8; pointer-events:none; }
+//`;
 
 
-  const serializer = new XMLSerializer();
-  const clone = svg.cloneNode(true);
+  //const serializer = new XMLSerializer();
+  //const clone = svg.cloneNode(true);
 
-  // INSERTAR CSS DENTRO DEL SVG CLONADO
-  const style = document.createElementNS("http://www.w3.org/2000/svg","style");
-  style.textContent = css;
-  clone.insertBefore(style, clone.firstChild);
+  //// INSERTAR CSS DENTRO DEL SVG CLONADO
+  //const style = document.createElementNS("http://www.w3.org/2000/svg","style");
+  //style.textContent = css;
+  //clone.insertBefore(style, clone.firstChild);
 
-  // limpiar tabindex
-  if(clone.hasAttribute('tabindex')) clone.removeAttribute('tabindex');
+  //// limpiar tabindex
+  //if(clone.hasAttribute('tabindex')) clone.removeAttribute('tabindex');
   
-    // 🔥 TRUCO: forzar flechas negras
-    const arrow = clone.querySelector('#arrow path');
-    if (arrow) arrow.setAttribute('fill', 'black');  
+    //// 🔥 TRUCO: forzar flechas negras
+    //const arrow = clone.querySelector('#arrow path');
+    //if (arrow) arrow.setAttribute('fill', 'black');  
 
-  const svgData = serializer.serializeToString(clone);
-  const svgBlob = new Blob([svgData], {type:'image/svg+xml'});
-  const url = URL.createObjectURL(svgBlob);
+  //const svgData = serializer.serializeToString(clone);
+  //const svgBlob = new Blob([svgData], {type:'image/svg+xml'});
+  //const url = URL.createObjectURL(svgBlob);
 
-  const img = new Image();
-  img.onload = function(){
-    const canvasEl = document.createElement('canvas');
-    canvasEl.width = svg.clientWidth;
-    canvasEl.height = svg.clientHeight;
-    const ctx = canvasEl.getContext('2d');
-    ctx.drawImage(img,0,0);
-    URL.revokeObjectURL(url);
+  //const img = new Image();
+  //img.onload = function(){
+    //const canvasEl = document.createElement('canvas');
+    //canvasEl.width = svg.clientWidth;
+    //canvasEl.height = svg.clientHeight;
+    //const ctx = canvasEl.getContext('2d');
+    //ctx.drawImage(img,0,0);
+    //URL.revokeObjectURL(url);
 
-    canvasEl.toBlob(function(blob){
-      const pngUrl = URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=pngUrl;
-      a.download='automata.png';
-      a.click();
-      URL.revokeObjectURL(pngUrl);
-    });
-  };
+    //canvasEl.toBlob(function(blob){
+      //const pngUrl = URL.createObjectURL(blob);
+      //const a=document.createElement('a');
+      //a.href=pngUrl;
+      //a.download='automata.png';
+      //a.click();
+      //URL.revokeObjectURL(pngUrl);
+    //});
+  //};
 
-  img.src = url;
-});
+  //img.src = url;
+//});
   
   
   
@@ -705,6 +707,8 @@ const css = `
     stepOnce(0);
   }
 
+
+function initial_sample(){
   // initial sample
   createState(310,95,'Q0/000'); 
   createState(476,93,'Q1/001');
@@ -714,11 +718,15 @@ const css = `
   createState(321,443,'Q5/101');
   createState(173,363,'Q6/110');
   createState(171,184,'Q7/111');
-  states[7].initial = true; /*states[2].accept = true;*/
-  /*createTransition(states[0].id, states[1].id, '0');
+  states[7].initial = true;
+  /*states[2].accept = true;
+  createTransition(states[0].id, states[1].id, '0');
   createTransition(states[1].id, states[2].id, '1');
   createTransition(states[2].id, states[2].id, 'X');*/
   render();
+}
+  
+  initial_sample();
 
   </script>
 </body>
