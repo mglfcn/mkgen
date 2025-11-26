@@ -8,7 +8,7 @@
     :root{--bg:#0f1720;--panel:#0b1220;--accent:#60a5fa;--muted:#9ca3af;--white:#e6eef8}
     html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071024 0%, #071428 100%);color:var(--white)}
     .app{display:flex;height:100vh}
-    .sidebar{width:320px;background:rgba(10,16,24,0.7);backdrop-filter:blur(6px);padding:14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
+    .sidebar{width:120px;background:rgba(10,16,24,0.7);backdrop-filter:blur(6px);padding:14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
     .canvas-wrap{flex:1;position:relative}
     h1{font-size:18px;margin:6px 0}
     p.small{color:var(--muted);font-size:13px;margin:6px 0 12px}
@@ -37,8 +37,12 @@
 
       <div class="toolbar">
         <button id="btnNew">Nuevo</button>
+<!--
         <button id="btnImport">Importar JSON</button>
+-->
+<!--
         <button id="btnExport">Exportar JSON</button>
+-->
         <button id="btnExportPNG">Exportar PNG</button>
         <button id="btnCopy">Copy</button>
       </div>
@@ -57,6 +61,7 @@
       </div>
 -->
 
+<!--
       <div class="tip">
         Atajos:
         <ul style="margin:6px 0 0 18px;padding:0;color:var(--muted)">
@@ -69,6 +74,7 @@
           <li>Supr: borrar elemento seleccionado</li>
         </ul>
       </div>
+-->
 
 <!--
       <div style="margin-top:12px">
@@ -90,9 +96,9 @@
           </filter>
         </defs>
       </svg>
-<!--
-      <footer>Haga clic para añadir estados • Shift+arrastrar para transiciones</footer>
--->
+
+      <footer>Clic: crear estado • Shift+clic: añadir transición • R:estado inicial • clic + Supr: borrar •  •  •  • </footer>
+
     </div>
   </div>
 
@@ -526,13 +532,13 @@ if (!hasReverse) {
 
   // basic import/export
   document.getElementById('btnNew').addEventListener('click', ()=>{ states=[]; transitions=[]; nextId=0; render(); });
-  document.getElementById('btnExport').addEventListener('click', ()=>{
-    const data = { states, transitions };
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'automata.json'; a.click(); URL.revokeObjectURL(url);
-  });
-  document.getElementById('btnImport').addEventListener('click', ()=>{ document.getElementById('fileInput').click(); });
+  //document.getElementById('btnExport').addEventListener('click', ()=>{
+    //const data = { states, transitions };
+    //const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    //const url = URL.createObjectURL(blob);
+    //const a = document.createElement('a'); a.href = url; a.download = 'automata.json'; a.click(); URL.revokeObjectURL(url);
+  //});
+  //document.getElementById('btnImport').addEventListener('click', ()=>{ document.getElementById('fileInput').click(); });
   document.getElementById('fileInput').addEventListener('change', (ev)=>{
     const f = ev.target.files[0]; if(!f) return; const reader = new FileReader();
     reader.onload = e=>{ try{ const obj = JSON.parse(e.target.result); states = obj.states||[]; transitions = obj.transitions||[]; nextId = (states.length? Math.max(...states.map(s=> parseInt(s.id.replace(/^q/,'')) ))+1:1); render(); }catch(err){ alert('JSON inválido'); } }
