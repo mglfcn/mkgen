@@ -10,3 +10,6 @@ MKGen is a web-based tool that creates JavaScript keyboards for Moodle short-ans
 
 ## More info (examples, FAQ, ...)
 Visit [atc.unizar.es/mkgen](https://atc.unizar.es/mkgen)
+
+## See how it looks
+![how it looks](mkgen-index_ev.gif)
