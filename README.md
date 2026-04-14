@@ -9,4 +9,4 @@ MKGen is a web-based tool that creates JavaScript keyboards for Moodle short-ans
 - ✔ Support for Student Quizzes and 'Regular expression short answer'.
 
 ## More info (examples, FAQ, ...)
-Visit atc.unizar.es/mkgen
+Visit [atc.unizar.es/mkgen](https://atc.unizar.es/mkgen)
