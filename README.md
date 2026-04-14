@@ -6,7 +6,7 @@ MKGen is a web-based tool that creates JavaScript keyboards for Moodle short-ans
 - ✔ Key Control to lead to a correctly formatted answer
 - ✔ Keyboard configuration stored in URL.
 - ✔ Keyboard can be embedded (or linked) in the 'question text'.
-- ✔ Support for Student Quizzes and 'Regular expression short answer'.
+- ✔ Support for [Student Quizzes](https://moodle.org/plugins/mod_studentquiz) and ['Regular expression short answer'](https://moodle.org/plugins/qtype_regexp).
 
 ## More info (examples, FAQ, ...)
 Visit [atc.unizar.es/mkgen](https://atc.unizar.es/mkgen)
