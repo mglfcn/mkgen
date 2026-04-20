@@ -4,6 +4,7 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
 @copyright 2026 Luis M. Ramos <luisma@unizar.es>
 -->
 <html>
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
@@ -13,59 +14,61 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div>
- <div id="configuracion" style="display: none; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">  	
+  <div>
+    <div id="configuracion" style="display: none; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
 
-  <h3>Description:</h3>
-  
-  <textarea 
-  id="descripcion" 
-  oninput="actualizarDescripcion()" 
-  style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" 
-  rows="3">Type one 'a', one or more 'b' and one 'c'</textarea>
+      <h3>Description:</h3>
 
-  	
-  <h3><a href="https://peggyjs.org/documentation.html#grammar-syntax-and-semantics" target="_blank">PEG grammar</a>:</h3>
-  <textarea id="gramatica" style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" rows="27" cols="60">
+      <textarea id="descripcion" oninput="actualizarDescripcion()"
+        style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;"
+        rows="3">Type one 'a', one or more 'b' and one 'c'</textarea>
+
+
+      <h3><a href="https://peggyjs.org/documentation.html#grammar-syntax-and-semantics" target="_blank">PEG grammar</a>:
+      </h3>
+      <textarea id="gramatica" style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" rows="27" cols="60">
 // This grammar accepts: "abc" "abbc" "abbbc" "abbbbc" ... 
 start = "a" "b"+ "c"
   </textarea>
 
-  <h3>Keys:</h3>
-  Write single quoted values. Use '|' as a line break. Use \' for apostrophe.
-  <input type="text" id="simbolos" value="'a'   'b'   'c'   '|'   'ab'   'bb'   'bc'   'bbbc'" style="width: 100%; font-size: 1em; padding: 6px;" />
- 
-  <button type="button" onclick="generarURL()" title="Click to copy the URL to the clipboard">🔗 Copy URL</button>
-  <button type="button" onclick="generarPagina()" title="Click to copy JS code to the clipboard">📜 Copy JavaScript code</button> 
-  <button type="button" id="btn-control" onclick="toggleControlTeclas()" title="Click to change Key Control" style="background-color: #2ecc71;">🔒 Key Control: ON</button>
+      <h3>Keys:</h3>
+      Write single quoted values. Use '|' as a line break. Use \' for apostrophe.
+      <input type="text" id="simbolos" value="'a'   'b'   'c'   '|'   'ab'   'bb'   'bc'   'bbbc'"
+        style="width: 100%; font-size: 1em; padding: 6px;" />
+
+      <button type="button" onclick="generarURL()" title="Click to copy the URL to the clipboard">🔗 Copy URL</button>
+      <button type="button" onclick="generarPagina()" title="Click to copy JS code to the clipboard">📜 Copy JavaScript
+        code</button>
+      <button type="button" id="btn-control" onclick="toggleControlTeclas()" title="Click to change Key Control"
+        style="background-color: #2ecc71;">🔒 Key Control: ON</button>
+    </div>
+
+    <button id="btn-config" onclick="toggleConfig()" title="Click to show/hide configuration"
+      style="font-size: 0.9em; padding: 4px 8px; margin-bottom: 5px; display: none;">
+      ⚙️
+    </button>
+
+    <div id="descripcion2" style="white-space: pre-wrap; <!-- width: 500px; --> font-size: 1.1em; padding: 6px;">
+    </div>
+
+    <div id="botones">
+      <!-- Botones generados dinámicamente -->
+    </div>
+
+    <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️
+      Delete</button>
+    <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete
+      all</button>
+    <button type="button" id="btn-copiar" onclick="copiar()" disabled title="Click to copy"
+      style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
+
+    <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
+    <p id="resultado" style="font-weight: bold;"></p>
+    <p id="mensaje-copiado" style="color: green; font-weight: bold;"></p>
   </div>
-	  
-<button id="btn-config"
-  onclick="toggleConfig()"
-  title="Click to show/hide configuration"
-  style="font-size: 0.9em; padding: 4px 8px; margin-bottom: 5px; display: none;">
-  ⚙️
-</button>
-
-<div id="descripcion2"  
-       style="white-space: pre-wrap; <!-- width: 500px; --> font-size: 1.1em; padding: 6px;" >
-</div>
-  
-  <div id="botones">
-    <!-- Botones generados dinámicamente -->
-  </div>
-
-  <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️ Delete</button>
-  <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete all</button>
-  <button type="button" id="btn-copiar" onclick="copiar()" disabled title="Click to copy"
-    style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
-
-  <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
-  <p id="resultado" style="font-weight: bold;"></p>
-  <p id="mensaje-copiado" style="color: green; font-weight: bold;"></p>
-</div>
 
 </body>
 
@@ -75,102 +78,102 @@ start = "a" "b"+ "c"
   let parser = null;
   let simbolos = [];
   let controlTeclas = true; // activado por defecto
-    
-function actualizarDescripcion() {
-  const valor = document.getElementById("descripcion").value;
-  document.getElementById("descripcion2").textContent = valor;
-}    
-    
-    
-let configAbierta = false;
 
-function toggleConfig() {
-  const panel = document.getElementById("configuracion");
-  configAbierta = !configAbierta;
-
-  panel.style.display = configAbierta ? "block" : "none";
-
-  // Mantener visible si está abierta
-  if (configAbierta) {
-    document.getElementById("btn-config").style.display = "inline-block";
+  function actualizarDescripcion() {
+    const valor = document.getElementById("descripcion").value;
+    document.getElementById("descripcion2").textContent = valor;
   }
-}
 
-// Detectar Ctrl + Alt
-function actualizarBotonConfig(e) {
-  const btn = document.getElementById("btn-config");
 
-  if (e.ctrlKey && e.altKey) {
-    btn.style.display = "inline-block";
-  } else if (!configAbierta) {
-    btn.style.display = "none";
+  let configAbierta = false;
+
+  function toggleConfig() {
+    const panel = document.getElementById("configuracion");
+    configAbierta = !configAbierta;
+
+    panel.style.display = configAbierta ? "block" : "none";
+
+    // Mantener visible si está abierta
+    if (configAbierta) {
+      document.getElementById("btn-config").style.display = "inline-block";
+    }
   }
-}
 
-document.addEventListener("keydown", actualizarBotonConfig);
-document.addEventListener("keyup", actualizarBotonConfig);
+  // Detectar Ctrl + Alt
+  function actualizarBotonConfig(e) {
+    const btn = document.getElementById("btn-config");
 
-
-
-function generarURL() {
-  const gramatica = document.getElementById("gramatica").value;
-  //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
-  const simbolos = obtenerSimbolosDesdeCampo();
-  const descripcion = document.getElementById("descripcion").value;
-
-  const config = {
-    g: gramatica,
-    s: simbolos,
-    d: descripcion,
-    c: controlTeclas
-  };
-
-  // 🔥 Compresión + formato seguro para URL
-  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
-
-  const url = window.location.origin + window.location.pathname + "#" + compressed;
-
-  navigator.clipboard.writeText(url);
-
-  const msg = document.getElementById("mensaje-copiado");
-  msg.textContent = "🔗 URL copied";
-  setTimeout(() => msg.textContent = "", 2000);
-}
-
-
-function cargarDesdeURL() {
-  if (!window.location.hash) return;
-
-  try {
-    const compressed = window.location.hash.substring(1);
-
-    // 🔥 Descompresión
-    const json = LZString.decompressFromEncodedURIComponent(compressed);
-
-    if (!json) throw new Error("No se pudo descomprimir");
-
-    const config = JSON.parse(json);
-
-    if (config.g) {
-      document.getElementById("gramatica").value = config.g;
+    if (e.ctrlKey && e.altKey) {
+      btn.style.display = "inline-block";
+    } else if (!configAbierta) {
+      btn.style.display = "none";
     }
-
-    if (config.s) {
-      const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
-      document.getElementById("simbolos").value = texto;
-    }
-    
-    if (config.d) {
-      document.getElementById("descripcion").value = config.d;
-    }
-    if (config.c !== undefined) {
-	  controlTeclas = config.c;
-}
-
-  } catch (e) {
-    console.warn("Error leyendo configuración comprimida", e);
   }
-}
+
+  document.addEventListener("keydown", actualizarBotonConfig);
+  document.addEventListener("keyup", actualizarBotonConfig);
+
+
+
+  function generarURL() {
+    const gramatica = document.getElementById("gramatica").value;
+    //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
+    const simbolos = obtenerSimbolosDesdeCampo();
+    const descripcion = document.getElementById("descripcion").value;
+
+    const config = {
+      g: gramatica,
+      s: simbolos,
+      d: descripcion,
+      c: controlTeclas
+    };
+
+    // 🔥 Compresión + formato seguro para URL
+    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
+
+    const url = window.location.origin + window.location.pathname + "#" + compressed;
+
+    navigator.clipboard.writeText(url);
+
+    const msg = document.getElementById("mensaje-copiado");
+    msg.textContent = "🔗 URL copied";
+    setTimeout(() => msg.textContent = "", 2000);
+  }
+
+
+  function cargarDesdeURL() {
+    if (!window.location.hash) return;
+
+    try {
+      const compressed = window.location.hash.substring(1);
+
+      // 🔥 Descompresión
+      const json = LZString.decompressFromEncodedURIComponent(compressed);
+
+      if (!json) throw new Error("No se pudo descomprimir");
+
+      const config = JSON.parse(json);
+
+      if (config.g) {
+        document.getElementById("gramatica").value = config.g;
+      }
+
+      if (config.s) {
+        const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
+        document.getElementById("simbolos").value = texto;
+      }
+
+      if (config.d) {
+        document.getElementById("descripcion").value = config.d;
+      }
+      if (config.c !== undefined) {
+        controlTeclas = config.c;
+      }
+
+    } catch (e) {
+      console.warn("Error leyendo configuración comprimida", e);
+    }
+  }
 
 
 
@@ -222,10 +225,10 @@ function cargarDesdeURL() {
         contenedor.appendChild(document.createElement("br"));
       } else {
         const btn = document.createElement("button");
-		btn.type = "button";
-		if (s ===' ')
+        btn.type = "button";
+        if (s === ' ')
           btn.textContent = '␣';
-        else 
+        else
           btn.textContent = s;
 
         btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
@@ -301,62 +304,62 @@ function cargarDesdeURL() {
     actualizarBotones();
   }
 
-function puedeContinuar(cadena) {
-  if (!parser) return false;
+  function puedeContinuar(cadena) {
+    if (!parser) return false;
 
-  try {
-    parser.parse(cadena);
-    return true; // ya es válida
-  } catch (e) {
-    return e.message.includes("but end of input found.");
+    try {
+      parser.parse(cadena);
+      return true; // ya es válida
+    } catch (e) {
+      return e.message.includes("but end of input found.");
+    }
   }
-}
 
-function actualizarBotones() {
-  const contenedor = document.getElementById("botones");
-  const botones = contenedor.getElementsByTagName("button");
+  function actualizarBotones() {
+    const contenedor = document.getElementById("botones");
+    const botones = contenedor.getElementsByTagName("button");
 
-  // 🔥 Si está desactivado → habilitar todo
-  if (!controlTeclas) {
+    // 🔥 Si está desactivado → habilitar todo
+    if (!controlTeclas) {
+      for (const btn of botones) {
+        btn.disabled = false;
+        //btn.style.opacity = "1";
+      }
+      return;
+    }
+
+    // 🔒 Si está activado → lógica normal
+    const cadena = document.getElementById("cadena").value;
+
     for (const btn of botones) {
-      btn.disabled = false;
-      //btn.style.opacity = "1";
+      const simbolo = btn.textContent;
+      const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
+
+      if (puedeContinuar(nueva)) {
+        btn.disabled = false;
+        //btn.style.opacity = "1";
+      } else {
+        btn.disabled = true;
+        //btn.style.opacity = "0.9";
+      }
     }
-    return;
   }
 
-  // 🔒 Si está activado → lógica normal
-  const cadena = document.getElementById("cadena").value;
+  function toggleControlTeclas() {
+    controlTeclas = !controlTeclas;
 
-  for (const btn of botones) {
-    const simbolo = btn.textContent;
-    const nueva = cadena + (simbolo=="␣"?" ":simbolo);
+    const btn = document.getElementById("btn-control");
 
-    if (puedeContinuar(nueva)) {
-      btn.disabled = false;
-      //btn.style.opacity = "1";
+    if (controlTeclas) {
+      btn.textContent = "🔒 Key Control: ON";
+      btn.style.backgroundColor = "#2ecc71";
     } else {
-      btn.disabled = true;
-      //btn.style.opacity = "0.9";
+      btn.textContent = "🔓 Key Control: OFF";
+      btn.style.backgroundColor = "buttonface";
     }
+
+    actualizarBotones(); // refrescar estado
   }
-}
-
-function toggleControlTeclas() {
-  controlTeclas = !controlTeclas;
-
-  const btn = document.getElementById("btn-control");
-
-  if (controlTeclas) {
-    btn.textContent = "🔒 Key Control: ON";
-    btn.style.backgroundColor = "#2ecc71";
-  } else {
-    btn.textContent = "🔓 Key Control: OFF";
-    btn.style.backgroundColor = "buttonface";
-  }
-
-  actualizarBotones(); // refrescar estado
-}
 
   function generarPagina() {
     const gramatica = document.getElementById("gramatica").value;
@@ -365,8 +368,8 @@ function toggleControlTeclas() {
 
     const simbolos = obtenerSimbolosDesdeCampo();
     const simbolosLiteral = JSON.stringify(simbolos);
-    
-// ----------------------- def html  -------------------------------------------------
+
+    // ----------------------- def html  -------------------------------------------------
     const html = `
 <!DOCTYPE html>
 <!-- 
@@ -553,32 +556,32 @@ function actualizarBotones() {
     window.onload = compilarGramatica;
   <\/script>`;
 
-// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-//  descargar html
+    //  descargar html
     /*const blob = new Blob([html], { type: "text/html" });
     const enlace = document.createElement("a");
     enlace.href = URL.createObjectURL(blob);
     enlace.download = "MKGen_keyboard.html";
     enlace.click();*/
-  
-//  pegar html
-	navigator.clipboard.writeText(html).then(() => {
-	  const msg = document.getElementById("mensaje-copiado");
-	  msg.textContent = "📜 JavaScript code copied";
-	  setTimeout(() => msg.textContent = "", 2000);
-	}).catch(err => {
-	  alert("Error al copiar: " + err);
-	});    
-    
+
+    //  pegar html
+    navigator.clipboard.writeText(html).then(() => {
+      const msg = document.getElementById("mensaje-copiado");
+      msg.textContent = "📜 JavaScript code copied";
+      setTimeout(() => msg.textContent = "", 2000);
+    }).catch(err => {
+      alert("Error al copiar: " + err);
+    });
+
   }
 
   document.getElementById("gramatica").addEventListener("input", compilarGramatica);
   document.getElementById("simbolos").addEventListener("input", compilarGramatica);
   //window.onload = compilarGramatica;
-  
 
-  window.onload = function() {
+
+  window.onload = function () {
     cargarDesdeURL();
     compilarGramatica();
     actualizarDescripcion();
@@ -587,6 +590,6 @@ function actualizarBotones() {
       document.getElementById("configuracion").style.display = "block";
     }
 
-};
+  };
 
 </script>
