@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <!-- 
-MKGen Version: 0.8 - Fecha: 13/04/2026
+MKGen Version: 0.8.1 - Fecha: 20/04/2026
 @copyright 2026 Luis M. Ramos <luisma@unizar.es>
 -->
 <html>
-
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
@@ -14,61 +13,71 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-  <div>
-    <div id="configuracion" style="display: none; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+<div>
+ <div id="configuracion" style="display: none; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">  	
 
-      <h3>Description:</h3>
+  <h3>Description:</h3>
+  
+  <textarea 
+  id="descripcion" 
+  oninput="actualizarDescripcion()" 
+  style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" 
+  rows="3">Type one 'a', one or more 'b' and one 'c'</textarea>
 
-      <textarea id="descripcion" oninput="actualizarDescripcion()"
-        style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;"
-        rows="3">Type one 'a', one or more 'b' and one 'c'</textarea>
-
-
-      <h3><a href="https://peggyjs.org/documentation.html#grammar-syntax-and-semantics" target="_blank">PEG grammar</a>:
-      </h3>
-      <textarea id="gramatica" style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" rows="27" cols="60">
+  	
+  <h3><a href="https://peggyjs.org/documentation.html#grammar-syntax-and-semantics" target="_blank">PEG grammar</a>:</h3>
+  <textarea id="gramatica" style="width: 100%; font-size: 1em; padding: 6px; resize: vertical;" rows="27" cols="60">
 // This grammar accepts: "abc" "abbc" "abbbc" "abbbbc" ... 
 start = "a" "b"+ "c"
   </textarea>
 
-      <h3>Keys:</h3>
-      Write single quoted values. Use '|' as a line break. Use \' for apostrophe.
-      <input type="text" id="simbolos" value="'a'   'b'   'c'   '|'   'ab'   'bb'   'bc'   'bbbc'"
-        style="width: 100%; font-size: 1em; padding: 6px;" />
-
-      <button type="button" onclick="generarURL()" title="Click to copy the URL to the clipboard">🔗 Copy URL</button>
-      <button type="button" onclick="generarPagina()" title="Click to copy JS code to the clipboard">📜 Copy JavaScript
-        code</button>
-      <button type="button" id="btn-control" onclick="toggleControlTeclas()" title="Click to change Key Control"
-        style="background-color: #2ecc71;">🔒 Key Control: ON</button>
-    </div>
-
-    <button id="btn-config" onclick="toggleConfig()" title="Click to show/hide configuration"
-      style="font-size: 0.9em; padding: 4px 8px; margin-bottom: 5px; display: none;">
-      ⚙️
-    </button>
-
-    <div id="descripcion2" style="white-space: pre-wrap; font-size: 1.1em; padding: 6px;">
-    </div>
-
-    <div id="botones">
-      <!-- Botones generados dinámicamente -->
-    </div>
-
-    <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️
-      Delete</button>
-    <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete
-      all</button>
-    <button type="button" id="btn-copiar" onclick="copiar()" disabled title="Click to copy"
-      style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
-
-    <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
-    <p id="resultado" style="font-weight: bold;"></p>
-    <p id="mensaje-copiado" style="color: green; font-weight: bold;"></p>
+  <h3>Keys:</h3>
+  Write single quoted values. Use '|' as a line break. Use \' for apostrophe.
+  <input type="text" id="simbolos" value="'a'   'b'   'c'   '|'   'ab'   'bb'   'bc'   'bbbc'" style="width: 100%; font-size: 1em; padding: 6px;" />
+ 
+  <button type="button" onclick="generarURL()" title="Click to copy the URL to the clipboard">🔗 Copy URL</button>
+  <button type="button" id="btn-generar" onclick="generarPagina(event)" title="Click to copy JavaScript code to the clipboard (or press shift to download)">📜 Copy JavaScript code</button> 
+  <button type="button" id="btn-control" onclick="toggleControlTeclas()" title="Click to change Key Control" style="background-color: #2ecc71;">🔒 Key Control: ON</button>
   </div>
+	  
+<button id="btn-config"
+  onclick="toggleConfig()"
+  title="Click to show/hide configuration"
+  style="font-size: 0.9em; padding: 4px 8px; margin-bottom: 5px; display: none;">
+  ⚙️
+</button>
+
+<div id="descripcion2"  
+       style="white-space: pre-wrap; <!-- width: 500px; --> font-size: 1.1em; padding: 6px;" >
+</div>
+    <div id="botones"></div>    
+  <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️ Delete</button>
+  <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete all</button>
+  <button type="button" id="btn-copiar" onclick="copiar()" disabled title="Click to copy"
+    style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
+
+  <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
+    
+    
+	  <table width="100%" border="0" cellpadding="10" cellspacing="0">
+	  <tr>
+	    <!-- Columna del logo: width="1" hace que se ajuste al contenido -->
+		<td width="1" valign="middle">
+		  <a href="https://atc.unizar.es/mkgen/index.html"><img src="https://atc.unizar.es/mkgen/img/favicon32.png" alt="Created by MKGen"></a>
+		</td>
+		<td width="1" valign="middle" align="left" style="padding-right: 20px; white-space: nowrap;">
+		  <p id="resultado" style="font-weight: bold; margin: 0;"></p>	
+		</td>	
+		<td valign="middle" align="left">
+		  <p id="mensaje-copiado" style="color: green; font-weight: bold; margin: 0;"></p>
+		</td>	
+	  </tr>
+	  </table>    
+    
+    
+</div>
 
 </body>
 
@@ -78,102 +87,114 @@ start = "a" "b"+ "c"
   let parser = null;
   let simbolos = [];
   let controlTeclas = true; // activado por defecto
+    
+function actualizarDescripcion() {
+  const valor = document.getElementById("descripcion").value;
+  document.getElementById("descripcion2").textContent = valor;
+}    
+    
+    
+let configAbierta = false;
 
-  function actualizarDescripcion() {
-    const valor = document.getElementById("descripcion").value;
-    document.getElementById("descripcion2").textContent = valor;
+function toggleConfig() {
+  const panel = document.getElementById("configuracion");
+  configAbierta = !configAbierta;
+
+  panel.style.display = configAbierta ? "block" : "none";
+
+  // Mantener visible si está abierta
+  if (configAbierta) {
+    document.getElementById("btn-config").style.display = "inline-block";
+  }
+}
+
+
+function actualizarEstadoTeclado(e) {
+  //  BOTÓN CONFIG (Ctrl + Alt)
+  const btnConfig = document.getElementById("btn-config");
+
+  if (e.ctrlKey && e.altKey) {
+    btnConfig.style.display = "inline-block";
+  } else if (!configAbierta) {
+    btnConfig.style.display = "none";
   }
 
+  //  BOTÓN GENERAR (Shift)
+  const btnGenerar = document.getElementById("btn-generar");
 
-  let configAbierta = false;
+  if (e.shiftKey) {
+    btnGenerar.textContent = "💾 Download JavaScript code";
+  } else {
+    btnGenerar.textContent = "📜 Copy JavaScript code";
+  }
+}
 
-  function toggleConfig() {
-    const panel = document.getElementById("configuracion");
-    configAbierta = !configAbierta;
 
-    panel.style.display = configAbierta ? "block" : "none";
+document.addEventListener("keydown", actualizarEstadoTeclado);
+document.addEventListener("keyup", actualizarEstadoTeclado);
+document.addEventListener("mousemove", actualizarEstadoTeclado);
 
-    // Mantener visible si está abierta
-    if (configAbierta) {
-      document.getElementById("btn-config").style.display = "inline-block";
+
+
+function generarURL() {
+  const gramatica = document.getElementById("gramatica").value;
+  //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
+  const simbolos = obtenerSimbolosDesdeCampo();
+  const descripcion = document.getElementById("descripcion").value;
+
+  const config = {
+    g: gramatica,
+    s: simbolos,
+    d: descripcion,
+    c: controlTeclas
+  };
+
+  // 🔥 Compresión + formato seguro para URL
+  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
+
+  const url = window.location.origin + window.location.pathname + "#" + compressed;
+
+  navigator.clipboard.writeText(url);
+
+  const msg = document.getElementById("mensaje-copiado");
+  msg.textContent = "🔗 URL copied";
+  setTimeout(() => msg.textContent = "", 2000);
+}
+
+
+function cargarDesdeURL() {
+  if (!window.location.hash) return;
+
+  try {
+    const compressed = window.location.hash.substring(1);
+
+    // 🔥 Descompresión
+    const json = LZString.decompressFromEncodedURIComponent(compressed);
+
+    if (!json) throw new Error("No se pudo descomprimir");
+
+    const config = JSON.parse(json);
+
+    if (config.g) {
+      document.getElementById("gramatica").value = config.g;
     }
-  }
 
-  // Detectar Ctrl + Alt
-  function actualizarBotonConfig(e) {
-    const btn = document.getElementById("btn-config");
-
-    if (e.ctrlKey && e.altKey) {
-      btn.style.display = "inline-block";
-    } else if (!configAbierta) {
-      btn.style.display = "none";
+    if (config.s) {
+      const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
+      document.getElementById("simbolos").value = texto;
     }
-  }
-
-  document.addEventListener("keydown", actualizarBotonConfig);
-  document.addEventListener("keyup", actualizarBotonConfig);
-
-
-
-  function generarURL() {
-    const gramatica = document.getElementById("gramatica").value;
-    //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
-    const simbolos = obtenerSimbolosDesdeCampo();
-    const descripcion = document.getElementById("descripcion").value;
-
-    const config = {
-      g: gramatica,
-      s: simbolos,
-      d: descripcion,
-      c: controlTeclas
-    };
-
-    // 🔥 Compresión + formato seguro para URL
-    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
-
-    const url = window.location.origin + window.location.pathname + "#" + compressed;
-
-    navigator.clipboard.writeText(url);
-
-    const msg = document.getElementById("mensaje-copiado");
-    msg.textContent = "🔗 URL copied";
-    setTimeout(() => msg.textContent = "", 2000);
-  }
-
-
-  function cargarDesdeURL() {
-    if (!window.location.hash) return;
-
-    try {
-      const compressed = window.location.hash.substring(1);
-
-      // 🔥 Descompresión
-      const json = LZString.decompressFromEncodedURIComponent(compressed);
-
-      if (!json) throw new Error("No se pudo descomprimir");
-
-      const config = JSON.parse(json);
-
-      if (config.g) {
-        document.getElementById("gramatica").value = config.g;
-      }
-
-      if (config.s) {
-        const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
-        document.getElementById("simbolos").value = texto;
-      }
-
-      if (config.d) {
-        document.getElementById("descripcion").value = config.d;
-      }
-      if (config.c !== undefined) {
-        controlTeclas = config.c;
-      }
-
-    } catch (e) {
-      console.warn("Error leyendo configuración comprimida", e);
+    
+    if (config.d) {
+      document.getElementById("descripcion").value = config.d;
     }
+    if (config.c !== undefined) {
+	  controlTeclas = config.c;
+}
+
+  } catch (e) {
+    console.warn("Error leyendo configuración comprimida", e);
   }
+}
 
 
 
@@ -200,10 +221,10 @@ start = "a" "b"+ "c"
 
     try {
       parser = peggy.generate(grammarText);
-      document.getElementById("resultado").innerText = "";
+      //document.getElementById("resultado").innerText = ""; // 20/4/26 se puede quitar
       generarBotones();
-      actualizarBotones();
-      evaluar();
+      //actualizarBotones(); //20/4/26 se puede quitar. Ya se le llama desde evaluar()
+      evaluar(); 
     } catch (e) {
       parser = null;
       document.getElementById("resultado").innerText = "⚠️ Grammar error: " + e.message;
@@ -225,10 +246,10 @@ start = "a" "b"+ "c"
         contenedor.appendChild(document.createElement("br"));
       } else {
         const btn = document.createElement("button");
-        btn.type = "button";
-        if (s === ' ')
+		btn.type = "button";
+		if (s ===' ')
           btn.textContent = '␣';
-        else
+        else 
           btn.textContent = s;
 
         btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
@@ -304,88 +325,85 @@ start = "a" "b"+ "c"
     actualizarBotones();
   }
 
-  function puedeContinuar(cadena) {
-    if (!parser) return false;
+function puedeContinuar(cadena) {
+  if (!parser) return false;
 
-    try {
-      parser.parse(cadena);
-      return true; // ya es válida
-    } catch (e) {
-      return e.message.includes("but end of input found.");
-    }
+  try {
+    parser.parse(cadena);
+    return true; // ya es válida
+  } catch (e) {
+    return e.message.includes("but end of input found.");
   }
+}
 
-  function actualizarBotones() {
-    const contenedor = document.getElementById("botones");
-    const botones = contenedor.getElementsByTagName("button");
+function actualizarBotones() {
+  const contenedor = document.getElementById("botones");
+  const botones = contenedor.getElementsByTagName("button");
 
-    // 🔥 Si está desactivado → habilitar todo
-    if (!controlTeclas) {
-      for (const btn of botones) {
-        btn.disabled = false;
-        //btn.style.opacity = "1";
-      }
-      return;
-    }
-
-    // 🔒 Si está activado → lógica normal
-    const cadena = document.getElementById("cadena").value;
-
+  // 🔥 Si está desactivado → habilitar todo
+  if (!controlTeclas) {
     for (const btn of botones) {
-      const simbolo = btn.textContent;
-      const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
-
-      if (puedeContinuar(nueva)) {
-        btn.disabled = false;
-        //btn.style.opacity = "1";
-      } else {
-        btn.disabled = true;
-        //btn.style.opacity = "0.9";
-      }
+      btn.disabled = false;
+      //btn.style.opacity = "1";
     }
+    return;
   }
 
-  function toggleControlTeclas() {
-    controlTeclas = !controlTeclas;
+  // 🔒 Si está activado → lógica normal
+  const cadena = document.getElementById("cadena").value;
 
-    const btn = document.getElementById("btn-control");
+  for (const btn of botones) {
+    const simbolo = btn.textContent;
+    const nueva = cadena + (simbolo=="␣"?" ":simbolo);
 
-    if (controlTeclas) {
-      btn.textContent = "🔒 Key Control: ON";
-      btn.style.backgroundColor = "#2ecc71";
+    if (puedeContinuar(nueva)) {
+      btn.disabled = false;
+      //btn.style.opacity = "1";
     } else {
-      btn.textContent = "🔓 Key Control: OFF";
-      btn.style.backgroundColor = "buttonface";
+      btn.disabled = true;
+      //btn.style.opacity = "0.9";
     }
+  }
+}
 
-    actualizarBotones(); // refrescar estado
+function toggleControlTeclas() {
+  controlTeclas = !controlTeclas;
+
+  const btn = document.getElementById("btn-control");
+
+  if (controlTeclas) {
+    btn.textContent = "🔒 Key Control: ON";
+    btn.style.backgroundColor = "#2ecc71";
+  } else {
+    btn.textContent = "🔓 Key Control: OFF";
+    btn.style.backgroundColor = "buttonface";
   }
 
-  function generarPagina() {
+  actualizarBotones(); // refrescar estado
+}
+
+  function generarPagina(e) {
     const gramatica = document.getElementById("gramatica").value;
     const simbolosRaw = document.getElementById("simbolos").value;
     const descripcion = document.getElementById("descripcion").value;
 
     const simbolos = obtenerSimbolosDesdeCampo();
     const simbolosLiteral = JSON.stringify(simbolos);
-
-    // ----------------------- def html  -------------------------------------------------
+    
+// ----------------------- def html  -------------------------------------------------
     const html = `
 <!DOCTYPE html>
 <!-- 
-MKGen Version: 0.8 - Fecha: 13/04/2026
+MKGen Version: 0.8.1 - Fecha: 20/04/2026
 @copyright 2026 Luis M. Ramos <luisma@unizar.es>
 -->
 
   <script src="https://cdn.jsdelivr.net/npm/peggy@1.2.0"><\/script>
 
   <div style="border: 1px solid #000; padding: 20px; max-width: 1000px; width: 100%; border-radius: 8px; background-color: #f9f9f9;">
-<!--
-    <h3><a href="https://atc.unizar.es/mkgen/index.html"><img src="https://atc.unizar.es/mkgen/img/favicon32.png" alt="Created by MKGen"></a></h3>
--->
-    <div id="descripcion2"  
-       style="white-space: pre-wrap; <!-- width: 500px; --> font-size: 1.1em; padding: 6px;" >
-	</div>
+		<div id="descripcion2"  
+		   style="white-space: pre-wrap; <!-- width: 500px; --> font-size: 1.1em; padding: 6px;" >
+		</div>
     <div id="botones"></div>    
     <button type="button" onclick="deshacer()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">⌫️ Delete</button>
     <button type="button" onclick="borrar()" style="font-size: 1.1em; padding: 8px 16px; margin: 5px;">🗑️ Delete all</button>
@@ -393,8 +411,24 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
       style="font-size: 1.1em; padding: 8px 16px; margin: 5px; opacity: 0.5; cursor: not-allowed;">📋 Copy</button>
 
     <p><input type="text" id="cadena" readonly style="width: 300px; font-size: 1.1em; padding: 6px;" /></p>
-    <p id="resultado" style="font-weight: bold;"></p>
-    <p id="mensaje-copiado" style="color: green; font-weight: bold;"></p>
+    
+    
+	  <table width="100%" border="0" cellpadding="10" cellspacing="0">
+	  <tr>
+	    <!-- Columna del logo: width="1" hace que se ajuste al contenido -->
+		<td width="1" valign="middle">
+		  <a href="https://atc.unizar.es/mkgen/index.html"><img src="https://atc.unizar.es/mkgen/img/favicon32.png" alt="Created by MKGen"></a>
+		</td>
+		<td width="1" valign="middle" align="left" style="padding-right: 20px; white-space: nowrap;">
+		  <p id="resultado" style="font-weight: bold; margin: 0;"></p>	
+		</td>	
+		<td valign="middle" align="left">
+		  <p id="mensaje-copiado" style="color: green; font-weight: bold; margin: 0;"></p>
+		</td>	
+	  </tr>
+	  </table>    
+    
+    
   </div>
 
   <script>
@@ -408,15 +442,17 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
       try {
         parser = peggy.generate(gramatica);
         generarBotones();
-      actualizarBotones();
+        //actualizarBotones(); //20/4/26 se puede quitar. Ya se le llama desde evaluar()
         evaluar();
       } catch (e) {
         parser = null;
         document.getElementById("resultado").innerText = "⚠️ Grammar error: " + e.message;
         document.getElementById("resultado").style.color = "red";
-        document.getElementById("btn-copiar").disabled = true;
-        document.getElementById("btn-copiar").style.opacity = "0.5";
-        document.getElementById("btn-copiar").style.cursor = "not-allowed";
+
+      const btnCopiar = document.getElementById("btn-copiar");
+      btnCopiar.disabled = true;
+      btnCopiar.style.opacity = "0.5";
+      btnCopiar.style.cursor = "not-allowed";
       }
     }
 
@@ -435,8 +471,7 @@ MKGen Version: 0.8 - Fecha: 13/04/2026
           else 
             btn.textContent = s;
           
-          //btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px;");
-          btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px;");
+          btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
           btn.onclick = () => agregar(s);
           contenedor.appendChild(btn);
         }
@@ -556,32 +591,35 @@ function actualizarBotones() {
     window.onload = compilarGramatica;
   <\/script>`;
 
-    // --------------------------------------------------------------------
+// --------------------------------------------------------------------
 
-    //  descargar html
-    /*const blob = new Blob([html], { type: "text/html" });
-    const enlace = document.createElement("a");
-    enlace.href = URL.createObjectURL(blob);
-    enlace.download = "MKGen_keyboard.html";
-    enlace.click();*/
-
-    //  pegar html
-    navigator.clipboard.writeText(html).then(() => {
-      const msg = document.getElementById("mensaje-copiado");
-      msg.textContent = "📜 JavaScript code copied";
-      setTimeout(() => msg.textContent = "", 2000);
-    }).catch(err => {
-      alert("Error al copiar: " + err);
-    });
-
+//  descargar html
+	if (e && e.shiftKey) { 
+		const blob = new Blob([html], { type: "text/html" });
+		const enlace = document.createElement("a");
+		enlace.href = URL.createObjectURL(blob);
+		enlace.download = "MKGen_keyboard.html";
+		enlace.click();
+		return;
+	}
+  
+//  pegar html
+	navigator.clipboard.writeText(html).then(() => {
+	  const msg = document.getElementById("mensaje-copiado");
+	  msg.textContent = "📜 JavaScript code copied";
+	  setTimeout(() => msg.textContent = "", 2000);
+	}).catch(err => {
+	  alert("Error al copiar: " + err);
+	});    
+    
   }
 
   document.getElementById("gramatica").addEventListener("input", compilarGramatica);
   document.getElementById("simbolos").addEventListener("input", compilarGramatica);
   //window.onload = compilarGramatica;
+  
 
-
-  window.onload = function () {
+  window.onload = function() {
     cargarDesdeURL();
     compilarGramatica();
     actualizarDescripcion();
@@ -590,6 +628,6 @@ function actualizarBotones() {
       document.getElementById("configuracion").style.display = "block";
     }
 
-  };
+};
 
 </script>
