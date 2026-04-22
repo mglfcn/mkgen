@@ -246,10 +246,11 @@ start = "a" "b"+ "c"
         } else {
           const btn = document.createElement("button");
           btn.type = "button";
-          if (s === ' ')
+          btn.textContent = s.replace(/ /g, '␣');
+          /*if (s === ' ')
             btn.textContent = '␣';
           else
-            btn.textContent = s;
+            btn.textContent = s;*/
 
           btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
           btn.onclick = () => agregar(s);
@@ -353,7 +354,8 @@ start = "a" "b"+ "c"
 
       for (const btn of botones) {
         const simbolo = btn.textContent;
-        const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
+        //const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
+        const nueva = cadena + simbolo.replace(/␣/g, ' ');
 
         if (puedeContinuar(nueva)) {
           btn.disabled = false;
@@ -465,10 +467,11 @@ MKGen Version: 0.8.1 - Fecha: 20/04/2026
         } else {
           const btn = document.createElement("button");
 		  btn.type = "button";
-		  if (s ===' ')
-            btn.textContent = '␣';
-          else 
-            btn.textContent = s;
+      btn.textContent = s.replace(/ /g, '␣');
+		  /*if (s ===' ')
+          btn.textContent = '␣';
+        else 
+          btn.textContent = s;*/
           
           btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
           btn.onclick = () => agregar(s);
@@ -572,7 +575,8 @@ function actualizarBotones() {
 
   for (const btn of botones) {
     const simbolo = btn.textContent;
-    const nueva = cadena + (simbolo=="␣"?" ":simbolo);
+    //const nueva = cadena + (simbolo=="␣"?" ":simbolo);
+    const nueva = cadena + simbolo.replace(/␣/g, ' ');
 
     if (puedeContinuar(nueva)) {
       btn.disabled = false;
