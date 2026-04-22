@@ -78,319 +78,319 @@ start = "a" "b"+ "c"
 
   </div>
 
-</body>
-
-<script src="https://cdn.jsdelivr.net/npm/peggy@1.2.0"></script>
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
-<script>
-  let parser = null;
-  let simbolos = [];
-  let controlTeclas = true; // activado por defecto
-
-  function actualizarDescripcion() {
-    const valor = document.getElementById("descripcion").value;
-    document.getElementById("descripcion2").textContent = valor;
-  }
 
 
-  let configAbierta = false;
+  <script src="https://cdn.jsdelivr.net/npm/peggy@1.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+  <script>
+    let parser = null;
+    let simbolos = [];
+    let controlTeclas = true; // activado por defecto
 
-  function toggleConfig() {
-    const panel = document.getElementById("configuracion");
-    configAbierta = !configAbierta;
-
-    panel.style.display = configAbierta ? "block" : "none";
-
-    // Mantener visible si está abierta
-    if (configAbierta) {
-      document.getElementById("btn-config").style.display = "inline-block";
-    }
-  }
-
-
-  function actualizarEstadoTeclado(e) {
-    //  BOTÓN CONFIG (Ctrl + Alt)
-    const btnConfig = document.getElementById("btn-config");
-
-    if (e.ctrlKey && e.altKey) {
-      btnConfig.style.display = "inline-block";
-    } else if (!configAbierta) {
-      btnConfig.style.display = "none";
+    function actualizarDescripcion() {
+      const valor = document.getElementById("descripcion").value;
+      document.getElementById("descripcion2").textContent = valor;
     }
 
-    //  BOTÓN GENERAR (Shift)
-    const btnGenerar = document.getElementById("btn-generar");
 
-    if (e.shiftKey) {
-      btnGenerar.textContent = "💾 Download JavaScript code";
-    } else {
-      btnGenerar.textContent = "📜 Copy JavaScript code";
-    }
-  }
+    let configAbierta = false;
 
+    function toggleConfig() {
+      const panel = document.getElementById("configuracion");
+      configAbierta = !configAbierta;
 
-  document.addEventListener("keydown", actualizarEstadoTeclado);
-  document.addEventListener("keyup", actualizarEstadoTeclado);
-  document.addEventListener("mousemove", actualizarEstadoTeclado);
+      panel.style.display = configAbierta ? "block" : "none";
 
-
-
-  function generarURL() {
-    const gramatica = document.getElementById("gramatica").value;
-    //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
-    const simbolos = obtenerSimbolosDesdeCampo();
-    const descripcion = document.getElementById("descripcion").value;
-
-    const config = {
-      g: gramatica,
-      s: simbolos,
-      d: descripcion,
-      c: controlTeclas
-    };
-
-    // 🔥 Compresión + formato seguro para URL
-    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
-
-    const url = window.location.origin + window.location.pathname + "#" + compressed;
-
-    navigator.clipboard.writeText(url);
-
-    const msg = document.getElementById("mensaje-copiado");
-    msg.textContent = "🔗 URL copied";
-    setTimeout(() => msg.textContent = "", 2000);
-  }
-
-
-  function cargarDesdeURL() {
-    if (!window.location.hash) return;
-
-    try {
-      const compressed = window.location.hash.substring(1);
-
-      // 🔥 Descompresión
-      const json = LZString.decompressFromEncodedURIComponent(compressed);
-
-      if (!json) throw new Error("No se pudo descomprimir");
-
-      const config = JSON.parse(json);
-
-      if (config.g) {
-        document.getElementById("gramatica").value = config.g;
-      }
-
-      if (config.s) {
-        const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
-        document.getElementById("simbolos").value = texto;
-      }
-
-      if (config.d) {
-        document.getElementById("descripcion").value = config.d;
-      }
-      if (config.c !== undefined) {
-        controlTeclas = config.c;
-      }
-
-    } catch (e) {
-      console.warn("Error leyendo configuración comprimida", e);
-    }
-  }
-
-
-
-  function obtenerSimbolosDesdeCampo() {
-    const texto = document.getElementById("simbolos").value;
-    const simbolosExtraidos = [];
-    const regex = /'(?:\\'|[^'])*?'/g;
-    const matches = texto.match(regex);
-
-    if (matches) {
-      for (const m of matches) {
-        const sinComillas = m.slice(1, -1);
-        const procesado = sinComillas.replace(/\\'/g, "'"); // reemplaza \' por '
-        simbolosExtraidos.push(procesado);
+      // Mantener visible si está abierta
+      if (configAbierta) {
+        document.getElementById("btn-config").style.display = "inline-block";
       }
     }
 
-    return simbolosExtraidos;
-  }
 
-  function compilarGramatica() {
-    const grammarText = document.getElementById("gramatica").value;
-    simbolos = obtenerSimbolosDesdeCampo();
+    function actualizarEstadoTeclado(e) {
+      //  BOTÓN CONFIG (Ctrl + Alt)
+      const btnConfig = document.getElementById("btn-config");
 
-    try {
-      parser = peggy.generate(grammarText);
-      //document.getElementById("resultado").innerText = ""; // 20/4/26 se puede quitar
-      generarBotones();
-      //actualizarBotones(); //20/4/26 se puede quitar. Ya se le llama desde evaluar()
+      if (e.ctrlKey && e.altKey) {
+        btnConfig.style.display = "inline-block";
+      } else if (!configAbierta) {
+        btnConfig.style.display = "none";
+      }
+
+      //  BOTÓN GENERAR (Shift)
+      const btnGenerar = document.getElementById("btn-generar");
+
+      if (e.shiftKey) {
+        btnGenerar.textContent = "💾 Download JavaScript code";
+      } else {
+        btnGenerar.textContent = "📜 Copy JavaScript code";
+      }
+    }
+
+
+    document.addEventListener("keydown", actualizarEstadoTeclado);
+    document.addEventListener("keyup", actualizarEstadoTeclado);
+    document.addEventListener("mousemove", actualizarEstadoTeclado);
+
+
+
+    function generarURL() {
+      const gramatica = document.getElementById("gramatica").value;
+      //const simbolos = parsearSimbolos(document.getElementById("simbolos").value);
+      const simbolos = obtenerSimbolosDesdeCampo();
+      const descripcion = document.getElementById("descripcion").value;
+
+      const config = {
+        g: gramatica,
+        s: simbolos,
+        d: descripcion,
+        c: controlTeclas
+      };
+
+      // 🔥 Compresión + formato seguro para URL
+      const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(config));
+
+      const url = window.location.origin + window.location.pathname + "#" + compressed;
+
+      navigator.clipboard.writeText(url);
+
+      const msg = document.getElementById("mensaje-copiado");
+      msg.textContent = "🔗 URL copied";
+      setTimeout(() => msg.textContent = "", 2000);
+    }
+
+
+    function cargarDesdeURL() {
+      if (!window.location.hash) return;
+
+      try {
+        const compressed = window.location.hash.substring(1);
+
+        // 🔥 Descompresión
+        const json = LZString.decompressFromEncodedURIComponent(compressed);
+
+        if (!json) throw new Error("No se pudo descomprimir");
+
+        const config = JSON.parse(json);
+
+        if (config.g) {
+          document.getElementById("gramatica").value = config.g;
+        }
+
+        if (config.s) {
+          const texto = config.s.map(s => `'${s.replace(/'/g, "\\'")}'`).join("   ");
+          document.getElementById("simbolos").value = texto;
+        }
+
+        if (config.d) {
+          document.getElementById("descripcion").value = config.d;
+        }
+        if (config.c !== undefined) {
+          controlTeclas = config.c;
+        }
+
+      } catch (e) {
+        console.warn("Error leyendo configuración comprimida", e);
+      }
+    }
+
+
+
+    function obtenerSimbolosDesdeCampo() {
+      const texto = document.getElementById("simbolos").value;
+      const simbolosExtraidos = [];
+      const regex = /'(?:\\'|[^'])*?'/g;
+      const matches = texto.match(regex);
+
+      if (matches) {
+        for (const m of matches) {
+          const sinComillas = m.slice(1, -1);
+          const procesado = sinComillas.replace(/\\'/g, "'"); // reemplaza \' por '
+          simbolosExtraidos.push(procesado);
+        }
+      }
+
+      return simbolosExtraidos;
+    }
+
+    function compilarGramatica() {
+      const grammarText = document.getElementById("gramatica").value;
+      simbolos = obtenerSimbolosDesdeCampo();
+
+      try {
+        parser = peggy.generate(grammarText);
+        //document.getElementById("resultado").innerText = ""; // 20/4/26 se puede quitar
+        generarBotones();
+        //actualizarBotones(); //20/4/26 se puede quitar. Ya se le llama desde evaluar()
+        evaluar();
+      } catch (e) {
+        parser = null;
+        document.getElementById("resultado").innerText = "⚠️ Grammar error: " + e.message;
+        document.getElementById("resultado").style.color = "red";
+
+        const btnCopiar = document.getElementById("btn-copiar");
+        btnCopiar.disabled = true;
+        btnCopiar.style.opacity = "0.5";
+        btnCopiar.style.cursor = "not-allowed";
+      }
+    }
+
+    function generarBotones() {
+      const contenedor = document.getElementById("botones");
+      contenedor.innerHTML = "";
+
+      simbolos.forEach(s => {
+        if (s === '|') {
+          contenedor.appendChild(document.createElement("br"));
+        } else {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          if (s === ' ')
+            btn.textContent = '␣';
+          else
+            btn.textContent = s;
+
+          btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
+          btn.onclick = () => agregar(s);
+          contenedor.appendChild(btn);
+        }
+      });
+    }
+
+    function agregar(simbolo) {
+      const input = document.getElementById("cadena");
+      input.value += simbolo;
       evaluar();
-    } catch (e) {
-      parser = null;
-      document.getElementById("resultado").innerText = "⚠️ Grammar error: " + e.message;
-      document.getElementById("resultado").style.color = "red";
+    }
+
+    function deshacer() {
+      const input = document.getElementById("cadena");
+      input.value = input.value.slice(0, -1);
+      evaluar();
+    }
+
+    function borrar() {
+      document.getElementById("cadena").value = "";
+      document.getElementById("resultado").innerText = "";
+      document.getElementById("mensaje-copiado").innerText = "";
 
       const btnCopiar = document.getElementById("btn-copiar");
       btnCopiar.disabled = true;
       btnCopiar.style.opacity = "0.5";
       btnCopiar.style.cursor = "not-allowed";
+      actualizarBotones();
     }
-  }
 
-  function generarBotones() {
-    const contenedor = document.getElementById("botones");
-    contenedor.innerHTML = "";
+    function copiar() {
+      const texto = document.getElementById("cadena").value;
+      navigator.clipboard.writeText(texto).then(() => {
+        const msg = document.getElementById("mensaje-copiado");
+        msg.textContent = "📎 Copied to clipboard";
+        setTimeout(() => msg.textContent = "", 2000);
+      }).catch(err => {
+        alert("Copy error: " + err);
+      });
+    }
 
-    simbolos.forEach(s => {
-      if (s === '|') {
-        contenedor.appendChild(document.createElement("br"));
-      } else {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        if (s === ' ')
-          btn.textContent = '␣';
-        else
-          btn.textContent = s;
+    function evaluar() {
+      const cadena = document.getElementById("cadena").value;
+      const resultado = document.getElementById("resultado");
+      const btnCopiar = document.getElementById("btn-copiar");
 
-        btn.setAttribute("style", "font-size: 1.2em; padding: 10px 20px; margin: 5px; height: 50px; vertical-align: middle;");
-        btn.onclick = () => agregar(s);
-        contenedor.appendChild(btn);
+      if (!parser) {
+        btnCopiar.disabled = true;
+        btnCopiar.style.opacity = "0.5";
+        btnCopiar.style.cursor = "not-allowed";
+        return;
       }
-    });
-  }
 
-  function agregar(simbolo) {
-    const input = document.getElementById("cadena");
-    input.value += simbolo;
-    evaluar();
-  }
+      try {
+        parser.parse(cadena);
+        resultado.innerText = "✅ Correct format";
+        resultado.style.color = "green";
 
-  function deshacer() {
-    const input = document.getElementById("cadena");
-    input.value = input.value.slice(0, -1);
-    evaluar();
-  }
+        btnCopiar.disabled = false;
+        btnCopiar.style.opacity = "1";
+        btnCopiar.style.cursor = "pointer";
+      } catch (e) {
+        resultado.innerText = "❌ Incomplete or invalid";
+        resultado.style.color = "orange";
 
-  function borrar() {
-    document.getElementById("cadena").value = "";
-    document.getElementById("resultado").innerText = "";
-    document.getElementById("mensaje-copiado").innerText = "";
-
-    const btnCopiar = document.getElementById("btn-copiar");
-    btnCopiar.disabled = true;
-    btnCopiar.style.opacity = "0.5";
-    btnCopiar.style.cursor = "not-allowed";
-    actualizarBotones();
-  }
-
-  function copiar() {
-    const texto = document.getElementById("cadena").value;
-    navigator.clipboard.writeText(texto).then(() => {
-      const msg = document.getElementById("mensaje-copiado");
-      msg.textContent = "📎 Copied to clipboard";
-      setTimeout(() => msg.textContent = "", 2000);
-    }).catch(err => {
-      alert("Copy error: " + err);
-    });
-  }
-
-  function evaluar() {
-    const cadena = document.getElementById("cadena").value;
-    const resultado = document.getElementById("resultado");
-    const btnCopiar = document.getElementById("btn-copiar");
-
-    if (!parser) {
-      btnCopiar.disabled = true;
-      btnCopiar.style.opacity = "0.5";
-      btnCopiar.style.cursor = "not-allowed";
-      return;
+        btnCopiar.disabled = true;
+        btnCopiar.style.opacity = "0.5";
+        btnCopiar.style.cursor = "not-allowed";
+      }
+      actualizarBotones();
     }
 
-    try {
-      parser.parse(cadena);
-      resultado.innerText = "✅ Correct format";
-      resultado.style.color = "green";
+    function puedeContinuar(cadena) {
+      if (!parser) return false;
 
-      btnCopiar.disabled = false;
-      btnCopiar.style.opacity = "1";
-      btnCopiar.style.cursor = "pointer";
-    } catch (e) {
-      resultado.innerText = "❌ Incomplete or invalid";
-      resultado.style.color = "orange";
-
-      btnCopiar.disabled = true;
-      btnCopiar.style.opacity = "0.5";
-      btnCopiar.style.cursor = "not-allowed";
+      try {
+        parser.parse(cadena);
+        return true; // ya es válida
+      } catch (e) {
+        return e.message.includes("but end of input found.");
+      }
     }
-    actualizarBotones();
-  }
 
-  function puedeContinuar(cadena) {
-    if (!parser) return false;
+    function actualizarBotones() {
+      const contenedor = document.getElementById("botones");
+      const botones = contenedor.getElementsByTagName("button");
 
-    try {
-      parser.parse(cadena);
-      return true; // ya es válida
-    } catch (e) {
-      return e.message.includes("but end of input found.");
-    }
-  }
+      // 🔥 Si está desactivado → habilitar todo
+      if (!controlTeclas) {
+        for (const btn of botones) {
+          btn.disabled = false;
+          //btn.style.opacity = "1";
+        }
+        return;
+      }
 
-  function actualizarBotones() {
-    const contenedor = document.getElementById("botones");
-    const botones = contenedor.getElementsByTagName("button");
+      // 🔒 Si está activado → lógica normal
+      const cadena = document.getElementById("cadena").value;
 
-    // 🔥 Si está desactivado → habilitar todo
-    if (!controlTeclas) {
       for (const btn of botones) {
-        btn.disabled = false;
-        //btn.style.opacity = "1";
+        const simbolo = btn.textContent;
+        const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
+
+        if (puedeContinuar(nueva)) {
+          btn.disabled = false;
+          //btn.style.opacity = "1";
+        } else {
+          btn.disabled = true;
+          //btn.style.opacity = "0.9";
+        }
       }
-      return;
     }
 
-    // 🔒 Si está activado → lógica normal
-    const cadena = document.getElementById("cadena").value;
+    function toggleControlTeclas() {
+      controlTeclas = !controlTeclas;
 
-    for (const btn of botones) {
-      const simbolo = btn.textContent;
-      const nueva = cadena + (simbolo == "␣" ? " " : simbolo);
+      const btn = document.getElementById("btn-control");
 
-      if (puedeContinuar(nueva)) {
-        btn.disabled = false;
-        //btn.style.opacity = "1";
+      if (controlTeclas) {
+        btn.textContent = "🔒 Key Control: ON";
+        btn.style.backgroundColor = "#2ecc71";
       } else {
-        btn.disabled = true;
-        //btn.style.opacity = "0.9";
+        btn.textContent = "🔓 Key Control: OFF";
+        btn.style.backgroundColor = "buttonface";
       }
-    }
-  }
 
-  function toggleControlTeclas() {
-    controlTeclas = !controlTeclas;
-
-    const btn = document.getElementById("btn-control");
-
-    if (controlTeclas) {
-      btn.textContent = "🔒 Key Control: ON";
-      btn.style.backgroundColor = "#2ecc71";
-    } else {
-      btn.textContent = "🔓 Key Control: OFF";
-      btn.style.backgroundColor = "buttonface";
+      actualizarBotones(); // refrescar estado
     }
 
-    actualizarBotones(); // refrescar estado
-  }
+    function generarPagina(e) {
+      const gramatica = document.getElementById("gramatica").value;
+      const simbolosRaw = document.getElementById("simbolos").value;
+      const descripcion = document.getElementById("descripcion").value;
 
-  function generarPagina(e) {
-    const gramatica = document.getElementById("gramatica").value;
-    const simbolosRaw = document.getElementById("simbolos").value;
-    const descripcion = document.getElementById("descripcion").value;
+      const simbolos = obtenerSimbolosDesdeCampo();
+      const simbolosLiteral = JSON.stringify(simbolos);
 
-    const simbolos = obtenerSimbolosDesdeCampo();
-    const simbolosLiteral = JSON.stringify(simbolos);
-
-    // ----------------------- def html  -------------------------------------------------
-    const html = `
+      // ----------------------- def html  -------------------------------------------------
+      const html = `
 <!DOCTYPE html>
 <!-- 
 MKGen Version: 0.8.1 - Fecha: 20/04/2026
@@ -590,43 +590,46 @@ function actualizarBotones() {
     window.onload = compilarGramatica;
   <\/script>`;
 
-    // --------------------------------------------------------------------
+      // --------------------------------------------------------------------
 
-    //  descargar html
-    if (e && e.shiftKey) {
-      const blob = new Blob([html], { type: "text/html" });
-      const enlace = document.createElement("a");
-      enlace.href = URL.createObjectURL(blob);
-      enlace.download = "MKGen_keyboard.html";
-      enlace.click();
-      return;
+      //  descargar html
+      if (e && e.shiftKey) {
+        const blob = new Blob([html], { type: "text/html" });
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = "MKGen_keyboard.html";
+        enlace.click();
+        return;
+      }
+
+      //  pegar html
+      navigator.clipboard.writeText(html).then(() => {
+        const msg = document.getElementById("mensaje-copiado");
+        msg.textContent = "📜 JavaScript code copied";
+        setTimeout(() => msg.textContent = "", 2000);
+      }).catch(err => {
+        alert("Error al copiar: " + err);
+      });
+
     }
 
-    //  pegar html
-    navigator.clipboard.writeText(html).then(() => {
-      const msg = document.getElementById("mensaje-copiado");
-      msg.textContent = "📜 JavaScript code copied";
-      setTimeout(() => msg.textContent = "", 2000);
-    }).catch(err => {
-      alert("Error al copiar: " + err);
-    });
-
-  }
-
-  document.getElementById("gramatica").addEventListener("input", compilarGramatica);
-  document.getElementById("simbolos").addEventListener("input", compilarGramatica);
-  //window.onload = compilarGramatica;
+    document.getElementById("gramatica").addEventListener("input", compilarGramatica);
+    document.getElementById("simbolos").addEventListener("input", compilarGramatica);
+    //window.onload = compilarGramatica;
 
 
-  window.onload = function () {
-    cargarDesdeURL();
-    compilarGramatica();
-    actualizarDescripcion();
+    window.onload = function () {
+      cargarDesdeURL();
+      compilarGramatica();
+      actualizarDescripcion();
 
-    if (!window.location.hash) {
-      document.getElementById("configuracion").style.display = "block";
-    }
+      if (!window.location.hash) {
+        document.getElementById("configuracion").style.display = "block";
+      }
 
-  };
+    };
 
-</script>
+  </script>
+</body>
+
+</html>
