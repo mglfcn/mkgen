@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 ### Added
 - Working to be listed in the moodle.org plugin directory.
 - Instructions on how to install and use the utility.
+- Keyboard Repository.
 
 ## [1.0.1]- 2026-05-25
 
