@@ -1,0 +1,126 @@
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px; /* 👈 añade esto o 17 o quitar */
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+header {
+  background-color: #002b5c;
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+header p {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+}
+
+nav {
+  background-color: #004080;
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav a {
+  color: white;
+  margin: 0.3rem 0.8rem;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.logo {
+  display: block;
+  margin: 2rem auto;
+  max-width: 300px;
+}
+
+ul {
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.8rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #eaeaea;
+  color: #555;
+}
+
+.thumbnail {
+  width: 150px;         /* Tamaño fijo o ajustable */
+  height: auto;         /* Mantiene la proporción */
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05); /* Efecto al pasar el cursor */
+  cursor: pointer;
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+}
+
+.responsive {
+  max-width: 100%;
+  height: auto;
+}
+
+.demo-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  margin-top: 2rem;    /* Espacio por FUERA (arriba del nav) */
+  padding: 0.5rem 0;   /* Espacio por DENTRO (arriba y abajo de los botones) */
+}
+
+.prev-button, .next-button {
+  padding: 0.6em 1.2em;
+  background-color: #0056b3;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.version-button {
+  padding: 0.3em 0.8em;
+  font-size: 0.85rem; 
+  background-color: #0056b3;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.prev-button:hover, .next-button:hover {
+  background-color: #003d80;
+}
